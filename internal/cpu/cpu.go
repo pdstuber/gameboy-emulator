@@ -7,6 +7,7 @@ import (
 	"github.com/pdstuber/gameboy-emulator/pkg/types"
 	"github.com/pdstuber/gameboy-emulator/pkg/types/instructions"
 	"github.com/pdstuber/gameboy-emulator/pkg/util"
+	"github.com/pkg/errors"
 )
 
 type CPU struct {
@@ -32,14 +33,22 @@ func (c *CPU) FetchAndExecuteNextInstruction() error {
 		c.pc++
 	}()
 
+	instruction, err := decodeInstruction(opcode)
+	if err != nil {
+		return errors.Wrap(err, "could not decode instruction")
+	}
+	return instruction.Execute(c)
+}
+
+func decodeInstruction(opcode types.Opcode) (types.Instruction, error) {
 	var instruction types.Instruction
 	switch opcode {
-	case 0x3c:
+	case 0xc3:
 		instruction = new(instructions.JumpImmediate)
 
 	default:
-		return fmt.Errorf("unsupported opcode: %s", util.PrettyPrintOpcode(opcode))
+		return nil, fmt.Errorf("unsupported opcode: %s", util.PrettyPrintOpcode(opcode))
 	}
 
-	return instruction.Execute()
+	return instruction, nil
 }

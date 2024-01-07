@@ -7,5 +7,5 @@ import (
 )
 
 func PrettyPrintOpcode(opcode types.Opcode) string {
-	return fmt.Sprintf("0x%02x", opcode)
+	return fmt.Sprintf("0x%02X", opcode)
 }

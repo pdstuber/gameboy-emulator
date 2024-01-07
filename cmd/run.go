@@ -19,9 +19,9 @@ var (
 var runCmd = &cobra.Command{
 	Use:   "run pathToBootRom pathToRom",
 	Short: "Run the emulator with the provided rom.",
-	Args:  cobra.ExactArgs(2),
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		config := emulator.NewConfig(debug, args[0], args[1])
+		config := emulator.NewConfig(debug, args[0])
 
 		emulator, err := emulator.New(config)
 		if err != nil {

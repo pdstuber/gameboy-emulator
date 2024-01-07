@@ -1,7 +1,7 @@
 package memory
 
 import (
-	"errors"
+	"fmt"
 
 	"github.com/pdstuber/gameboy-emulator/pkg/types"
 )
@@ -21,8 +21,9 @@ func New() *Memory {
 }
 
 func (m *Memory) Load(data []byte, startAddress types.Address) error {
-	if int(startAddress)+len(data) > memorySize {
-		return errors.New("data to be loaded exceeds capacity")
+	size := len(data)
+	if int(startAddress)+size > memorySize+1 {
+		return fmt.Errorf("data to be loaded exceeds capacity, size=%d, capacity=%d", size, memorySize)
 	}
 
 	copy(m.data[startAddress:], data[:])

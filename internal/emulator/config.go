@@ -1,15 +1,13 @@
 package emulator
 
 type Config struct {
-	Debug             bool
-	PathToRomFile     string
-	PathToBootRomFile string
+	Debug         bool
+	PathToRomFile string
 }
 
-func NewConfig(debug bool, pathToBootRomFile, pathToRomFile string) *Config {
+func NewConfig(debug bool, pathToRomFile string) *Config {
 	return &Config{
-		Debug:             debug,
-		PathToBootRomFile: pathToBootRomFile,
-		PathToRomFile:     pathToRomFile,
+		Debug:         debug,
+		PathToRomFile: pathToRomFile,
 	}
 }

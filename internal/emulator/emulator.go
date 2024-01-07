@@ -19,17 +19,7 @@ type gameboy struct {
 }
 
 func New(config *Config) (*gameboy, error) {
-	f, err := os.Open(config.PathToBootRomFile)
-	if err != nil {
-		return nil, fmt.Errorf("could not open boot rom: %w", err)
-	}
-
-	bootRomData, err := io.ReadAll(f)
-	if err != nil {
-		return nil, fmt.Errorf("could not read boot rom data: %w", err)
-	}
-
-	f, err = os.Open(config.PathToRomFile)
+	f, err := os.Open(config.PathToRomFile)
 	if err != nil {
 		return nil, fmt.Errorf("could not open rom: %w", err)
 	}
@@ -40,16 +30,16 @@ func New(config *Config) (*gameboy, error) {
 	}
 
 	memory := memory.New()
-	if err := memory.Load(bootRomData, 0x0000); err != nil {
+
+	if err := memory.Load(romData, 0x100); err != nil {
 		return nil, err
 	}
-	if err := memory.Load(romData, 0x0100); err != nil {
-		return nil, err
-	}
+
 	return &gameboy{
 		cpu:             cpu.New(memory),
 		shutdownChannel: make(chan interface{}),
 		errorChannel:    make(chan error),
+		debug:           config.Debug,
 	}, nil
 }
 
@@ -65,8 +55,6 @@ func (g *gameboy) Start(ctx context.Context) error {
 	log.Println("emulator started")
 
 	select {
-	case <-g.shutdownChannel:
-		return nil
 	case err := <-g.errorChannel:
 		return err
 	case <-ctx.Done():
@@ -75,9 +63,12 @@ func (g *gameboy) Start(ctx context.Context) error {
 }
 
 func (e *gameboy) Stop() {
-	close(e.shutdownChannel)
+
 }
 
 func (g *gameboy) tick() error {
-	return g.cpu.FetchAndExecuteNextInstruction()
+	if err := g.cpu.FetchAndExecuteNextInstruction(); err != nil {
+		return err
+	}
+	return nil
 }

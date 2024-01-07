@@ -1,7 +1,11 @@
 package util
 
-import "fmt"
+import (
+	"fmt"
 
-func PrettyPrintByte(b byte) string {
-	return fmt.Sprintf("0x%02x", b)
+	"github.com/pdstuber/gameboy-emulator/pkg/types"
+)
+
+func PrettyPrintOpcode(opcode types.Opcode) string {
+	return fmt.Sprintf("0x%02x", opcode)
 }

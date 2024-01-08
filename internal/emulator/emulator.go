@@ -9,10 +9,12 @@ import (
 
 	"github.com/pdstuber/gameboy-emulator/internal/cpu"
 	"github.com/pdstuber/gameboy-emulator/internal/memory"
+	"github.com/pdstuber/gameboy-emulator/internal/ppu"
 )
 
 type gameboy struct {
 	cpu             *cpu.CPU
+	ppu             *ppu.PPU
 	shutdownChannel chan interface{}
 	errorChannel    chan error
 	debug           bool
@@ -35,8 +37,11 @@ func New(config *Config) (*gameboy, error) {
 		return nil, err
 	}
 
+	ppu := ppu.New()
+
 	return &gameboy{
-		cpu:             cpu.New(memory),
+		cpu:             cpu.New(memory, ppu),
+		ppu:             ppu,
 		shutdownChannel: make(chan interface{}),
 		errorChannel:    make(chan error),
 		debug:           config.Debug,
@@ -44,16 +49,18 @@ func New(config *Config) (*gameboy, error) {
 }
 
 func (g *gameboy) Start(ctx context.Context) error {
+
 	go func() {
-		for {
-			if err := g.tick(); err != nil {
-				g.errorChannel <- err
-				break
-			}
+		if err := g.cpu.Start(ctx); err != nil {
+			g.errorChannel <- err
 		}
 	}()
 
-	log.Println("emulator started")
+	go func() {
+		if err := g.ppu.Start(ctx); err != nil {
+			g.errorChannel <- err
+		}
+	}()
 
 	select {
 	case err := <-g.errorChannel:
@@ -68,13 +75,6 @@ func (g *gameboy) Start(ctx context.Context) error {
 
 func (e *gameboy) Stop() {
 
-}
-
-func (g *gameboy) tick() error {
-	if err := g.cpu.FetchAndExecuteNextInstruction(); err != nil {
-		return err
-	}
-	return nil
 }
 
 func (g *gameboy) GetState() string {

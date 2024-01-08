@@ -30,9 +30,11 @@ var runCmd = &cobra.Command{
 		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 		defer stop()
 
-		if err := emulator.Start(ctx); err != nil {
-			log.Fatal(err)
-		}
+		go func() {
+			if err := emulator.Start(ctx); err != nil {
+				log.Fatalf("starting emulator: %v\n", err)
+			}
+		}()
 
 		<-ctx.Done()
 		emulator.Stop()

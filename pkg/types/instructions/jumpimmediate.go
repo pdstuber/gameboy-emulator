@@ -16,7 +16,7 @@ func NewJumpImmediate() *JumpImmediate {
 	}
 }
 
-func (ji *JumpImmediate) Execute(cpu types.CPU) error {
+func (ji *JumpImmediate) Execute(cpu types.CPU) (int, error) {
 	lsb := cpu.ReadMemoryAndIncrementProgramCounter()
 	msb := cpu.ReadMemoryAndIncrementProgramCounter()
 
@@ -24,5 +24,5 @@ func (ji *JumpImmediate) Execute(cpu types.CPU) error {
 
 	cpu.SetProgramCounter(types.Address(nn))
 
-	return nil
+	return ji.durationInMachineCycles, nil
 }

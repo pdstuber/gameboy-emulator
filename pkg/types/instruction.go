@@ -6,5 +6,5 @@ type CPU interface {
 }
 
 type Instruction interface {
-	Execute(cpu CPU) error
+	Execute(cpu CPU) (int, error)
 }

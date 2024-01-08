@@ -1,5 +1,10 @@
 package types
 
+type CPU interface {
+	ReadMemoryAndIncrementProgramCounter() byte
+	SetProgramCounter(address Address)
+}
+
 type Instruction interface {
-	Execute() error
+	Execute(cpu CPU) error
 }

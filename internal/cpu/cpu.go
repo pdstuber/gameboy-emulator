@@ -28,16 +28,28 @@ func loadDefaults(cpu *CPU) {
 }
 
 func (c *CPU) FetchAndExecuteNextInstruction() error {
-	opcode := types.Opcode(c.memory.Read(c.pc))
-	defer func() {
-		c.pc++
-	}()
+	opcode := types.Opcode(c.ReadMemoryAndIncrementProgramCounter())
 
 	instruction, err := decodeInstruction(opcode)
 	if err != nil {
 		return errors.Wrap(err, "could not decode instruction")
 	}
+
 	return instruction.Execute(c)
+}
+
+func (c *CPU) ReadMemoryAndIncrementProgramCounter() byte {
+	data := c.memory.Read(c.pc)
+	c.pc++
+	return data
+}
+
+func (c *CPU) SetProgramCounter(address types.Address) {
+	c.pc = address
+}
+
+func (c *CPU) GetState() string {
+	return fmt.Sprintf("PC: %s", util.PrettyPrintAddress(c.pc))
 }
 
 func decodeInstruction(opcode types.Opcode) (types.Instruction, error) {

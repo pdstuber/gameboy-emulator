@@ -48,6 +48,7 @@ func (g *gameboy) Start(ctx context.Context) error {
 		for {
 			if err := g.tick(); err != nil {
 				g.errorChannel <- err
+				break
 			}
 		}
 	}()
@@ -56,6 +57,9 @@ func (g *gameboy) Start(ctx context.Context) error {
 
 	select {
 	case err := <-g.errorChannel:
+		if g.debug {
+			log.Println(g.GetState())
+		}
 		return err
 	case <-ctx.Done():
 		return nil
@@ -71,4 +75,8 @@ func (g *gameboy) tick() error {
 		return err
 	}
 	return nil
+}
+
+func (g *gameboy) GetState() string {
+	return g.cpu.GetState()
 }

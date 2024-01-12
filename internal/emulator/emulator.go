@@ -21,26 +21,44 @@ type gameboy struct {
 }
 
 func New(config *Config) (*gameboy, error) {
-	f, err := os.Open(config.PathToRomFile)
-	if err != nil {
-		return nil, fmt.Errorf("could not open rom: %w", err)
-	}
-
-	romData, err := io.ReadAll(f)
-	if err != nil {
-		return nil, fmt.Errorf("could not read rom data: %w", err)
-	}
+	var bootRomLoaded = false
 
 	memory := memory.New()
 
-	if err := memory.Load(romData, 0x100); err != nil {
-		return nil, err
+	if config.PathToBootRomFile != "" {
+		f, err := os.Open(config.PathToBootRomFile)
+		if err != nil {
+			return nil, fmt.Errorf("could not open boot rom: %w", err)
+		}
+		bootRomData, err := io.ReadAll(f)
+		if err != nil {
+			return nil, fmt.Errorf("could not read boot rom data: %w", err)
+		}
+		if err := memory.Load(bootRomData, 0x0); err != nil {
+			return nil, err
+		}
+		bootRomLoaded = true
+	}
+
+	if config.PathToRomFile != "" {
+		f, err := os.Open(config.PathToRomFile)
+		if err != nil {
+			return nil, fmt.Errorf("could not open rom: %w", err)
+		}
+		romData, err := io.ReadAll(f)
+		if err != nil {
+			return nil, fmt.Errorf("could not read rom data: %w", err)
+		}
+
+		if err := memory.Load(romData, 0x100); err != nil {
+			return nil, err
+		}
 	}
 
 	ppu := ppu.New()
 
 	return &gameboy{
-		cpu:             cpu.New(memory, ppu),
+		cpu:             cpu.New(bootRomLoaded, memory, ppu),
 		ppu:             ppu,
 		shutdownChannel: make(chan interface{}),
 		errorChannel:    make(chan error),

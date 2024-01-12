@@ -17,10 +17,7 @@ func NewJumpImmediate() *JumpImmediate {
 }
 
 func (ji *JumpImmediate) Execute(cpu types.CPU) (int, error) {
-	lsb := cpu.ReadMemoryAndIncrementProgramCounter()
-	msb := cpu.ReadMemoryAndIncrementProgramCounter()
-
-	nn := uint16(lsb) | uint16(msb)<<8
+	nn := nextWord(cpu)
 
 	cpu.SetProgramCounter(types.Address(nn))
 

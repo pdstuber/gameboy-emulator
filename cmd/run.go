@@ -11,11 +11,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	debug bool
-)
+var debug bool
 
-// runCmd represents the run command
+// runCmd represents the run command.
 var runCmd = &cobra.Command{
 	Use:   "run pathToBootRom pathToBootRom pathToRom",
 	Short: "Run the emulator with the provided rom(s).",

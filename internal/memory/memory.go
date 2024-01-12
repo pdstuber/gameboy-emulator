@@ -26,7 +26,7 @@ func (m *Memory) Load(data []byte, startAddress types.Address) error {
 		return fmt.Errorf("data to be loaded exceeds capacity, size=%d, capacity=%d", size, memorySize)
 	}
 
-	copy(m.data[startAddress:], data[:])
+	copy(m.data[startAddress:], data)
 
 	return nil
 }

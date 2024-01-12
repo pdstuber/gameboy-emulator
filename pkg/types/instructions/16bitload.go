@@ -20,7 +20,6 @@ func New16BitLoad(opcode types.Opcode) *Load16Bit {
 }
 
 func (i *Load16Bit) Execute(cpu types.CPU) (int, error) {
-
 	nn := nextWord(cpu)
 
 	switch i.opcode {

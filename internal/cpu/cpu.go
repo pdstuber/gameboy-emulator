@@ -49,6 +49,7 @@ func New(bootRomLoaded bool, memory *memory.Memory, ppu *ppu.PPU) *CPU {
 
 	return cpu
 }
+
 func loadDefaults(cpu *CPU) {
 	// skip boot logic
 	cpu.pc = 0x100
@@ -121,18 +122,23 @@ func decodeInstruction(opcode types.Opcode) (types.Instruction, error) {
 
 	return instruction, nil
 }
+
 func (c *CPU) SetRegisterA(value uint16) {
 	c.a = value
 }
+
 func (c *CPU) SetRegisterBC(value uint16) {
 	c.bc = value
 }
+
 func (c *CPU) SetRegisterDE(value uint16) {
 	c.de = value
 }
+
 func (c *CPU) SetRegisterHL(value uint16) {
 	c.hl = value
 }
+
 func (c *CPU) SetRegisterSP(value uint16) {
 	c.sp = value
 }
@@ -140,24 +146,31 @@ func (c *CPU) SetRegisterSP(value uint16) {
 func (c *CPU) GetRegisterA() uint16 {
 	return c.a
 }
+
 func (c *CPU) GetRegisterB() uint16 {
 	return c.b
 }
+
 func (c *CPU) GetRegisterC() uint16 {
 	return c.c
 }
+
 func (c *CPU) GetRegisterD() uint16 {
 	return c.d
 }
+
 func (c *CPU) GetRegisterE() uint16 {
 	return c.e
 }
+
 func (c *CPU) GetRegisterH() uint16 {
 	return c.h
 }
+
 func (c *CPU) GetRegisterHL() uint16 {
 	return c.hl
 }
+
 func (c *CPU) GetRegisterL() uint16 {
 	return c.l
 }
@@ -165,13 +178,15 @@ func (c *CPU) GetRegisterL() uint16 {
 func (c *CPU) SetFlagZ(value bool) {
 	c.flagZ = value
 }
+
 func (c *CPU) SetFlagN(value bool) {
 	c.flagN = value
 }
+
 func (c *CPU) SetFlagH(value bool) {
 	c.flagH = value
 }
+
 func (c *CPU) SetFlagC(value bool) {
 	c.flagC = value
-
 }

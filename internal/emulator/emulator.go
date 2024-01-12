@@ -21,7 +21,7 @@ type gameboy struct {
 }
 
 func New(config *Config) (*gameboy, error) {
-	var bootRomLoaded = false
+	bootRomLoaded := false
 
 	memory := memory.New()
 
@@ -67,7 +67,6 @@ func New(config *Config) (*gameboy, error) {
 }
 
 func (g *gameboy) Start(ctx context.Context) error {
-
 	go func() {
 		if err := g.cpu.Start(ctx); err != nil {
 			g.errorChannel <- err
@@ -92,7 +91,6 @@ func (g *gameboy) Start(ctx context.Context) error {
 }
 
 func (e *gameboy) Stop() {
-
 }
 
 func (g *gameboy) GetState() string {

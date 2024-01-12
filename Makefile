@@ -4,13 +4,11 @@ BINARY = gameboy-emulator
 
 # Build
 
-build: $(BINARY)
+build:
+	go build -o $(BINARY) main.go
 .PHONY: build
 
 # Test
-test: build
+test:
 	go test -v ./...
 .PHONY: test
-
-$(BINARY): 
-	go build -o $@ ./cmd/golangci-lint

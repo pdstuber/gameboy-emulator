@@ -21,7 +21,7 @@ func NewXOR(opcode types.Opcode) *XOR {
 
 func (i *XOR) Execute(cpu types.CPU) (int, error) {
 	var sourceRegisterValue = cpu.GetRegisterA()
-	var targetRegisterValue uint16
+	var targetRegisterValue uint8
 
 	switch i.opcode {
 	case 0xA8:
@@ -36,8 +36,6 @@ func (i *XOR) Execute(cpu types.CPU) (int, error) {
 		targetRegisterValue = cpu.GetRegisterH()
 	case 0xAD:
 		targetRegisterValue = cpu.GetRegisterL()
-	case 0xAE:
-		targetRegisterValue = cpu.GetRegisterHL()
 	case 0xAF:
 		targetRegisterValue = cpu.GetRegisterA()
 	default:
@@ -49,13 +47,13 @@ func (i *XOR) Execute(cpu types.CPU) (int, error) {
 	cpu.SetRegisterA(result)
 
 	if result == 0 {
-		cpu.SetFlagZ(true)
+		cpu.SetFlagZero()
 	} else {
-		cpu.SetFlagZ(false)
+		cpu.UnsetFlagZero()
 	}
-	cpu.SetFlagN(false)
-	cpu.SetFlagH(false)
-	cpu.SetFlagC(false)
+	cpu.UnsetFlagCarry()
+	cpu.UnsetFlagSubtraction()
+	cpu.UnsetFlagHalfCarry()
 
 	return i.durationInMachineCycles, nil
 }

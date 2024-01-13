@@ -10,6 +10,6 @@ func PrettyPrintOpcode(opcode types.Opcode) string {
 	return fmt.Sprintf("0x%02X", opcode)
 }
 
-func PrettyPrintAddress(address types.Address) string {
-	return fmt.Sprintf("0x%04X", address)
+func PrettyPrintUINT16(value uint16) string {
+	return fmt.Sprintf("0x%04X", value)
 }

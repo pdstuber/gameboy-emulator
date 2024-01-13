@@ -2,26 +2,46 @@ package types
 
 type CPU interface {
 	ReadMemoryAndIncrementProgramCounter() byte
-	SetProgramCounter(address Address)
-	SetRegisterA(value uint16)
+	WriteMemory(address Address, data byte)
+	SetProgramCounter(value uint16)
+	GetProgramCounter() uint16
+	SetRegisterA(value uint8)
+	SetRegisterC(value uint8)
+	SetRegisterE(value uint8)
+	SetRegisterL(value uint8)
 	SetRegisterBC(value uint16)
 	SetRegisterDE(value uint16)
 	SetRegisterHL(value uint16)
 	SetRegisterSP(value uint16)
 
-	GetRegisterA() uint16
-	GetRegisterB() uint16
-	GetRegisterC() uint16
-	GetRegisterD() uint16
-	GetRegisterE() uint16
-	GetRegisterH() uint16
+	GetRegisterA() uint8
+	GetRegisterB() uint8
+	GetRegisterC() uint8
+	GetRegisterD() uint8
+	GetRegisterE() uint8
+	GetRegisterH() uint8
 	GetRegisterHL() uint16
-	GetRegisterL() uint16
+	GetRegisterL() uint8
 
-	SetFlagZ(bool)
-	SetFlagN(bool)
-	SetFlagH(bool)
-	SetFlagC(bool)
+	UnsetFlagZero()
+
+	UnsetFlagHalfCarry()
+
+	UnsetFlagCarry()
+	UnsetFlagSubtraction()
+	SetFlagZero()
+
+	SetFlagCarry()
+
+	SetFlagHalfCarry()
+
+	SetFlagSubtraction()
+	GetFlagZero() bool
+
+	GetFlagCarry() bool
+
+	GetFlagHalfCarry() bool
+	GetFlagSubtraction() bool
 }
 
 type Instruction interface {

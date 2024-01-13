@@ -7,19 +7,19 @@ import (
 	"github.com/pdstuber/gameboy-emulator/pkg/util"
 )
 
-type Load16Bit struct {
+type LoadTo16BitRegister struct {
 	durationInMachineCycles int
 	opcode                  types.Opcode
 }
 
-func New16BitLoad(opcode types.Opcode) *Load16Bit {
-	return &Load16Bit{
+func NewLoadTo16BitRegister(opcode types.Opcode) *LoadTo16BitRegister {
+	return &LoadTo16BitRegister{
 		durationInMachineCycles: 3,
 		opcode:                  opcode,
 	}
 }
 
-func (i *Load16Bit) Execute(cpu types.CPU) (int, error) {
+func (i *LoadTo16BitRegister) Execute(cpu types.CPU) (int, error) {
 	nn := nextWord(cpu)
 
 	switch i.opcode {

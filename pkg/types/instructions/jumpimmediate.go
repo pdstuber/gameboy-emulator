@@ -6,20 +6,20 @@ import (
 
 type JumpImmediate struct {
 	durationInMachineCycles int
-	opcode                  uint16
+	opcode                  types.Opcode
 }
 
-func NewJumpImmediate() *JumpImmediate {
+func NewJumpImmediate(opcode types.Opcode) *JumpImmediate {
 	return &JumpImmediate{
 		durationInMachineCycles: 3,
-		opcode:                  0xC3,
+		opcode:                  opcode,
 	}
 }
 
 func (ji *JumpImmediate) Execute(cpu types.CPU) (int, error) {
 	nn := nextWord(cpu)
 
-	cpu.SetProgramCounter(types.Address(nn))
+	cpu.SetProgramCounter(nn)
 
 	return ji.durationInMachineCycles, nil
 }

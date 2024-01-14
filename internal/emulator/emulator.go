@@ -55,7 +55,7 @@ func New(config *Config) (*gameboy, error) {
 		}
 	}
 
-	ppu := ppu.New()
+	ppu := ppu.New(memory)
 
 	return &gameboy{
 		cpu:             cpu.New(bootRomLoaded, memory, ppu),

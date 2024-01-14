@@ -2,8 +2,6 @@ package ppu
 
 import (
 	"context"
-	"fmt"
-	"image/color"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -11,36 +9,10 @@ import (
 	"github.com/pdstuber/gameboy-emulator/pkg/types"
 )
 
-type Color uint8
-
 const (
-	White Color = iota
-	LightGrey
-	DarkGrey
-	Black
-)
-
-type Tile [8][8]Color
-
-func (c Color) ToStandardColor() color.Color {
-
-	switch c {
-	case White:
-		return color.White
-	case Black:
-		return color.Black
-	case LightGrey:
-		return color.Gray16{0x0000}
-	case DarkGrey:
-		return color.Gray16{}
-	}
-
-	return color.Opaque
-}
-
-const (
-	vramBegin = 0x8000
-	vramEnd   = 0x9FFF
+	vramBegin     = 0x8000
+	vramEnd       = 0x9FFF
+	numberOfTiles = 32
 )
 
 type PPU struct {
@@ -48,15 +20,15 @@ type PPU struct {
 	errorChannel  chan error
 	memory        *memory.Memory
 	pixels        []byte
-	tiles         []Tile
+	tiles         []types.Tile
 	screenWidth   int
 	screenHeight  int
 }
 
 func New(memory *memory.Memory) *PPU {
-	b := make([][]Tile, 32)
+	b := make([][]types.Tile, numberOfTiles)
 	for i := range b {
-		b[i] = make([]Tile, 32)
+		b[i] = make([]types.Tile, numberOfTiles)
 	}
 	return &PPU{
 		cyclesChannel: make(chan int),
@@ -94,49 +66,52 @@ func (p *PPU) NotifyCycles(cycles int) {
 }
 
 func (p *PPU) Update() error {
-	for i := vramBegin; i < vramEnd; i += 2 {
-		addressFirstTileByte := types.Address(i)
-		addressSecondTileByte := types.Address(i + 1)
-		byte1 := p.memory.Read(addressFirstTileByte)
-		byte2 := p.memory.Read(addressSecondTileByte)
+	for x := 0; x < numberOfTiles; x++ {
+		for y := 0; y < numberOfTiles; y++ {
+			tilePositionAddress := (y*32 + x) + 0x9800
+			tileIndex := p.memory.Read(types.Address(tilePositionAddress))
 
-		tileIndex := int((i - vramBegin) / 16)
-		rowIndex := int(((i - vramBegin) % 16) / 2)
+			tileDataStartAddress := 0x8000 + uint16(tileIndex*16)
 
-		for j := 0; j < 8; j++ {
+			// data for one tile occupies 16 bytes
+			for i := 0; i < 16; i += 2 {
 
-			mask := uint8(1 << (7 - j))
-			lsb := byte1 & mask
-			msb := byte2 & mask
+				byte1 := p.memory.Read(types.Address(uint16(tileDataStartAddress) + uint16(i)))
+				byte2 := p.memory.Read(types.Address(uint16(tileDataStartAddress) + uint16(i+1)))
 
-			var value Color
+				tile := calculateTile(i, byte1, byte2)
 
-			if lsb != 0 {
-				if msb != 0 {
-					value = Black
-				} else {
-					value = LightGrey
-				}
-			} else {
-				if msb != 0 {
-					value = DarkGrey
-				} else {
-					value = White
-				}
+				p.writeToFramebuffer(tile, x, y)
 
 			}
-			p.tiles[tileIndex][rowIndex][j] = value
 		}
-
 	}
-	fmt.Println(p.tiles)
+
 	return nil
 }
 
-func tilesToPixels(tiles []Tile) []byte {
-	for i := range tiles {
-		tile := tiles[i]
-		zs
+func calculateTile(index int, firstByte, secondByte byte) {
+	var tile types.Tile
+
+	for i := 0; i < 8; i++ {
+		mask := uint8(1 << (7 - i))
+		lsb := firstByte & mask
+		msb := secondByte & mask
+
+		var color types.Color = types.Color(uint8(lsb) | uint8(msb)<<8)
+
+		tile[index][i] = color
+	}
+}
+
+func (p *PPU) writeToFramebuffer(tile types.Tile, tilePositionX, tilePositionY int) {
+
+	for i := 0; i < 8; i++ {
+		for j := 0; j < 8; j++ {
+			xr := tilePositionX*8 + j
+			yr := tilePositionY*8 + i
+			p.pixels[yr][xr] = tile[i][j].ToStandardColor
+		}
 	}
 }
 

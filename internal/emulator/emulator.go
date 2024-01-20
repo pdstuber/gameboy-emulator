@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/hajimehoshi/ebiten"
 	"github.com/pdstuber/gameboy-emulator/internal/cpu"
 	"github.com/pdstuber/gameboy-emulator/internal/memory"
 	"github.com/pdstuber/gameboy-emulator/internal/ppu"
@@ -67,6 +68,17 @@ func New(config *Config) (*gameboy, error) {
 }
 
 func (g *gameboy) Start(ctx context.Context) error {
+
+	// Add ebiten Update function and add channels to notify cpu and ppu about ticks they should perform.
+	go func() {
+		ebiten.SetWindowSize(p.screenWidth*6, p.screenHeight*6)
+		ebiten.SetWindowTitle("Gameboy Emulator")
+		if err := ebiten.RunGame(p); err != nil {
+			log.Fatal(err)
+		}
+
+	}()
+
 	go func() {
 		if err := g.cpu.Start(ctx); err != nil {
 			g.errorChannel <- err
@@ -95,4 +107,13 @@ func (e *gameboy) Stop() {
 
 func (g *gameboy) GetState() string {
 	return g.cpu.GetState()
+}
+
+// http://www.codeslinger.co.uk/pages/projects/gameboy/graphics.html
+func (p *PPU) Draw(screen *ebiten.Image) {
+	screen.WritePixels(p.pixels)
+}
+
+func (p *PPU) Layout(outsideWidth, outsideHeight int) (int, int) {
+	return p.screenWidth, p.screenHeight
 }

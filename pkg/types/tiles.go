@@ -14,7 +14,7 @@ const (
 type Tile [8][8]Color
 
 func (c Color) ToStandardColor() color.Color {
-
+	// TODO use corret rgb codes for the grey
 	switch c {
 	case White:
 		return color.White

@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 
-	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/pdstuber/gameboy-emulator/internal/memory"
 	"github.com/pdstuber/gameboy-emulator/pkg/types"
 )
@@ -16,13 +15,13 @@ const (
 )
 
 type PPU struct {
-	cyclesChannel chan int
-	errorChannel  chan error
-	memory        *memory.Memory
-	pixels        []byte
-	tiles         []types.Tile
-	screenWidth   int
-	screenHeight  int
+	ticksChannel chan int
+	errorChannel chan error
+	memory       *memory.Memory
+	pixels       []byte
+	tiles        []types.Tile
+	screenWidth  int
+	screenHeight int
 }
 
 func New(memory *memory.Memory) *PPU {
@@ -31,41 +30,34 @@ func New(memory *memory.Memory) *PPU {
 		b[i] = make([]types.Tile, numberOfTiles)
 	}
 	return &PPU{
-		cyclesChannel: make(chan int),
-		errorChannel:  make(chan error),
-		memory:        memory,
-		pixels:        make([]byte, 256*256*8),
-		screenWidth:   256,
-		screenHeight:  256,
+		ticksChannel: make(chan int),
+		errorChannel: make(chan error),
+		memory:       memory,
+		pixels:       make([]byte, 256*256*8),
+		screenWidth:  256,
+		screenHeight: 256,
 	}
 }
 
 func (p *PPU) Start(ctx context.Context) error {
 	log.Println("starting ppu")
-	go func() {
-		ebiten.SetWindowSize(p.screenWidth*6, p.screenHeight*6)
-		ebiten.SetWindowTitle("Gameboy Emulator")
-		if err := ebiten.RunGame(p); err != nil {
-			log.Fatal(err)
+
+	for {
+		select {
+		case <-p.ticksChannel:
+			err := p.tick()
+			p.errorChannel <- err
+		case err := <-p.errorChannel:
+			return err
+		case <-ctx.Done():
+			return nil
 		}
-
-	}()
-
-	select {
-	case err := <-p.errorChannel:
-		return err
-	case <-ctx.Done():
-		return nil
 	}
+
 }
 
-func (p *PPU) NotifyCycles(cycles int) {
-	go func() {
-		p.cyclesChannel <- cycles
-	}()
-}
+func (p *PPU) tick() error {
 
-func (p *PPU) Update() error {
 	for x := 0; x < numberOfTiles; x++ {
 		for y := 0; y < numberOfTiles; y++ {
 			tilePositionAddress := (y*32 + x) + 0x9800
@@ -90,7 +82,13 @@ func (p *PPU) Update() error {
 	return nil
 }
 
-func calculateTile(index int, firstByte, secondByte byte) {
+func (p *PPU) NotifyTicks(ticks int) {
+	go func() {
+		p.ticksChannel <- ticks
+	}()
+}
+
+func calculateTile(index int, firstByte, secondByte byte) types.Tile {
 	var tile types.Tile
 
 	for i := 0; i < 8; i++ {
@@ -102,10 +100,10 @@ func calculateTile(index int, firstByte, secondByte byte) {
 
 		tile[index][i] = color
 	}
+	return tile
 }
 
 func (p *PPU) writeToFramebuffer(tile types.Tile, tilePositionX, tilePositionY int) {
-
 	for i := 0; i < 8; i++ {
 		for j := 0; j < 8; j++ {
 			xr := tilePositionX*8 + j
@@ -113,13 +111,4 @@ func (p *PPU) writeToFramebuffer(tile types.Tile, tilePositionX, tilePositionY i
 			p.pixels[yr][xr] = tile[i][j].ToStandardColor
 		}
 	}
-}
-
-// http://www.codeslinger.co.uk/pages/projects/gameboy/graphics.html
-func (p *PPU) Draw(screen *ebiten.Image) {
-	screen.WritePixels(p.pixels)
-}
-
-func (p *PPU) Layout(outsideWidth, outsideHeight int) (int, int) {
-	return p.screenWidth, p.screenHeight
 }

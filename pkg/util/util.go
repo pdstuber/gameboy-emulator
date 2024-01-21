@@ -47,7 +47,10 @@ func X() types.Tile {
 	return tile
 }
 
-func CalculateTile(data [16]byte) types.Tile {
+func CalculateTile(data []byte) types.Tile {
+	if len(data) != 16 {
+		panic("tile data must be exactly 16 bytes")
+	}
 	var tile types.Tile
 
 	for row := 0; row < 8; row++ {

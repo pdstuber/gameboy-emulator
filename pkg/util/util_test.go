@@ -9,7 +9,7 @@ import (
 
 func TestCalculateTile(t *testing.T) {
 
-	data := [16]byte{
+	data := []byte{
 		0b10100101,
 		0b11000011,
 		0b10011101,

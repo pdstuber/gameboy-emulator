@@ -6,6 +6,7 @@ import (
 
 	"github.com/pdstuber/gameboy-emulator/internal/memory"
 	"github.com/pdstuber/gameboy-emulator/pkg/types"
+	"github.com/pdstuber/gameboy-emulator/pkg/util"
 )
 
 const (
@@ -30,15 +31,11 @@ type PPU struct {
 }
 
 func New(memory *memory.Memory) *PPU {
-	b := make([][]types.Tile, numberOfTiles)
-	for i := range b {
-		b[i] = make([]types.Tile, numberOfTiles)
-	}
 	return &PPU{
 		ticksChannel: make(chan int),
 		errorChannel: make(chan error),
 		memory:       memory,
-		pixels:       make([]byte, 256*256*8),
+		pixels:       make([]byte, 256*256*4),
 		screenWidth:  256,
 		screenHeight: 256,
 	}
@@ -74,16 +71,17 @@ func (p *PPU) tick() error {
 			tileDataStartAddress := 0x8000 + uint16(tileIndex*16)
 
 			// data for one tile occupies 16 bytes
+			var tileData []byte = make([]byte, 16)
+
 			for i := 0; i < 16; i += 2 {
 
 				byte1 := p.memory.Read(types.Address(uint16(tileDataStartAddress) + uint16(i)))
 				byte2 := p.memory.Read(types.Address(uint16(tileDataStartAddress) + uint16(i+1)))
 
-				tile := calculateTile(i, byte1, byte2)
-
-				p.writeToFramebuffer(tile, x, y)
-
+				tileData = append(tileData, byte1, byte2)
 			}
+			tile := util.CalculateTile(tileData)
+			p.writeToFramebuffer(tile, x, y)
 		}
 	}
 
@@ -101,7 +99,12 @@ func (p *PPU) writeToFramebuffer(tile types.Tile, tilePositionX, tilePositionY i
 		for j := 0; j < 8; j++ {
 			xr := tilePositionX*8 + j
 			yr := tilePositionY*8 + i
-			p.pixels[yr][xr] = tile[i][j].ToStandardColor
+			color := tile[i][j].ToStandardColor()
+
+			p.pixels[xr+yr] = color.R
+			p.pixels[xr+yr+1] = color.G
+			p.pixels[xr+yr+2] = color.B
+			p.pixels[xr+yr+3] = color.A
 		}
 	}
 }

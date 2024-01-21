@@ -34,6 +34,7 @@ func (m *Memory) Load(data []byte, startAddress types.Address) error {
 func (m *Memory) Read(address types.Address) byte {
 	return m.data[address]
 }
+
 func (m *Memory) Write(address types.Address, b byte) {
 	m.data[address] = b
 }

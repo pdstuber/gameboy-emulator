@@ -1,8 +1,6 @@
 package ppu
 
 import (
-	"log"
-
 	"github.com/pdstuber/gameboy-emulator/internal/memory"
 	"github.com/pdstuber/gameboy-emulator/pkg/types"
 	"github.com/pdstuber/gameboy-emulator/pkg/util"
@@ -24,20 +22,19 @@ type PPU struct {
 	lcdcReader LCDCReader
 }
 
-func New(memory *memory.Memory, screenSize int) *PPU {
+func New(memory *memory.Memory, lcdcReader LCDCReader, screenSize int) *PPU {
 	return &PPU{
-		memory: memory,
-		Pixels: make([]byte, screenSize*4),
+		memory:     memory,
+		lcdcReader: lcdcReader,
+		Pixels:     make([]byte, screenSize*4),
 	}
 }
 
 func (p *PPU) Tick() error {
 	ppuInactive := p.lcdcReader.GetRegisterLCDC()&(1<<7) == 0
 	if ppuInactive {
-		log.Println("nothing to do")
 		return nil
 	}
-	log.Println("ticking")
 	for y := 0; y < numberOfTiles; y++ {
 		for x := 0; x < numberOfTiles; x++ {
 			currentPosition := y*32 + x

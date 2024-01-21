@@ -8,7 +8,6 @@ import (
 )
 
 func TestCalculateTile(t *testing.T) {
-
 	data := []byte{
 		0b10100101,
 		0b11000011,
@@ -43,7 +42,6 @@ func TestCalculateTile(t *testing.T) {
 }
 
 func TestCalculateColor(t *testing.T) {
-
 	color1 := calculateColor(7, 0b10100101, 0b11000011)
 	color2 := calculateColor(6, 0b10100101, 0b11000011)
 	color3 := calculateColor(5, 0b10100101, 0b11000011)
@@ -62,8 +60,8 @@ func TestCalculateColor(t *testing.T) {
 	require.Equal(t, types.DarkGrey, color7)
 	require.Equal(t, types.Black, color8)
 }
-func TestCalculateColor2(t *testing.T) {
 
+func TestCalculateColor2(t *testing.T) {
 	color1 := calculateColor(7, 0b10011101, 0b11010010)
 	color2 := calculateColor(6, 0b10011101, 0b11010010)
 	color3 := calculateColor(5, 0b10011101, 0b11010010)

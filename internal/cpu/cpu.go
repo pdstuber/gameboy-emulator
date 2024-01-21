@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/pdstuber/gameboy-emulator/internal/memory"
-	"github.com/pdstuber/gameboy-emulator/internal/ppu"
 	"github.com/pdstuber/gameboy-emulator/pkg/types"
 	"github.com/pdstuber/gameboy-emulator/pkg/types/instructions"
 	"github.com/pdstuber/gameboy-emulator/pkg/util"
@@ -19,16 +18,17 @@ const (
 )
 
 type CPU struct {
-	pc uint16
-	sp uint16
-	a  uint8
-	b  uint8
-	c  uint8
-	d  uint8
-	e  uint8
-	f  uint8
-	h  uint8
-	l  uint8
+	pc   uint16
+	sp   uint16
+	a    uint8
+	b    uint8
+	c    uint8
+	d    uint8
+	e    uint8
+	f    uint8
+	h    uint8
+	l    uint8
+	lcdc uint8
 
 	flagZ                     bool
 	flagN                     bool
@@ -36,14 +36,12 @@ type CPU struct {
 	flagC                     bool
 	lastWorkingProgramCounter uint16
 	memory                    *memory.Memory
-	ppu                       *ppu.PPU
 	errorChannel              chan error
 }
 
-func New(bootRomLoaded bool, memory *memory.Memory, ppu *ppu.PPU) *CPU {
+func New(bootRomLoaded bool, memory *memory.Memory) *CPU {
 	cpu := new(CPU)
 	cpu.memory = memory
-	cpu.ppu = ppu
 	cpu.errorChannel = make(chan error)
 
 	if !bootRomLoaded {
@@ -153,6 +151,7 @@ func (c *CPU) SetRegisterE(value uint8) {
 func (c *CPU) SetRegisterL(value uint8) {
 	c.l = value
 }
+
 func (c *CPU) SetRegisterBC(value uint16) {
 	c.b = uint8((value & 0xFF00) >> 8)
 	c.c = uint8((value & 0xFF))
@@ -204,6 +203,10 @@ func (c *CPU) GetRegisterL() uint8 {
 	return c.l
 }
 
+func (c *CPU) GetRegisterLCDC() uint8 {
+	return c.lcdc
+}
+
 func (c *CPU) UnsetFlagZero() {
 	c.f = c.f & ^bitmaskFlagZero
 }
@@ -215,9 +218,11 @@ func (c *CPU) UnsetFlagHalfCarry() {
 func (c *CPU) UnsetFlagCarry() {
 	c.f = c.f & ^bitMaskFlagCarry
 }
+
 func (c *CPU) UnsetFlagSubtraction() {
 	c.f = c.f & ^bitmaskFlagSubtraction
 }
+
 func (c *CPU) SetFlagZero() {
 	c.f = c.f | bitmaskFlagZero
 }
@@ -227,14 +232,13 @@ func (c *CPU) SetFlagCarry() {
 }
 
 func (c *CPU) SetFlagHalfCarry() {
-
 	c.f = c.f | bitmaskFlagHalfCarry
 }
 
 func (c *CPU) SetFlagSubtraction() {
-
 	c.f = c.f | bitmaskFlagSubtraction
 }
+
 func (c *CPU) GetFlagZero() bool {
 	return c.f&bitmaskFlagZero != 0x00
 }
@@ -244,11 +248,10 @@ func (c *CPU) GetFlagCarry() bool {
 }
 
 func (c *CPU) GetFlagHalfCarry() bool {
-
 	return c.f&bitmaskFlagHalfCarry != 0x00
 }
-func (c *CPU) GetFlagSubtraction() bool {
 
+func (c *CPU) GetFlagSubtraction() bool {
 	return c.f&bitmaskFlagSubtraction != 0x00
 }
 

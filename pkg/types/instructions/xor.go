@@ -20,7 +20,7 @@ func NewXOR(opcode types.Opcode) *XOR {
 }
 
 func (i *XOR) Execute(cpu types.CPU) (int, error) {
-	var sourceRegisterValue = cpu.GetRegisterA()
+	sourceRegisterValue := cpu.GetRegisterA()
 	var targetRegisterValue uint8
 
 	switch i.opcode {

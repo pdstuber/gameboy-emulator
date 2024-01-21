@@ -1,12 +1,13 @@
 package emulator
 
 import (
-	"context"
 	"fmt"
 	"io"
+	"log"
 	"os"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/pdstuber/gameboy-emulator/internal/cpu"
 	"github.com/pdstuber/gameboy-emulator/internal/memory"
 	"github.com/pdstuber/gameboy-emulator/internal/ppu"
@@ -60,10 +61,11 @@ func New(config *Config) (*gameboy, error) {
 		}
 	}
 
-	ppu := ppu.New(memory, screenWidth*screenHeight)
+	cpu := cpu.New(bootRomLoaded, memory)
+	ppu := ppu.New(memory, cpu, screenWidth*screenHeight)
 
 	return &gameboy{
-		cpu:             cpu.New(bootRomLoaded, memory, ppu),
+		cpu:             cpu,
 		ppu:             ppu,
 		shutdownChannel: make(chan interface{}),
 		errorChannel:    make(chan error),
@@ -71,11 +73,11 @@ func New(config *Config) (*gameboy, error) {
 	}, nil
 }
 
-func (g *gameboy) Start(ctx context.Context) error {
-
-	ebiten.SetWindowSize(screenWidth*6, screenHeight*6)
+func (g *gameboy) Start() error {
+	ebiten.SetWindowSize(screenWidth*2, screenHeight*2)
 	ebiten.SetWindowTitle("Gameboy Emulator")
 	if err := ebiten.RunGame(g); err != nil {
+		fmt.Println(err)
 		return err
 	}
 
@@ -91,10 +93,12 @@ func (g *gameboy) GetState() string {
 
 // http://www.codeslinger.co.uk/pages/projects/gameboy/graphics.html
 func (g *gameboy) Draw(screen *ebiten.Image) {
+	ebitenutil.DebugPrint(screen, fmt.Sprintf("fps=%0.2f\ntps=%0.2f", ebiten.CurrentFPS(), ebiten.CurrentTPS()))
 	screen.WritePixels(g.ppu.Pixels)
 }
 
 func (g *gameboy) Update() error {
+	log.Println("inside update")
 	if err := g.cpu.Tick(); err != nil {
 		return err
 	}

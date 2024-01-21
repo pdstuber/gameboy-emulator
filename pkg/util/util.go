@@ -54,7 +54,7 @@ func CalculateTile(data [16]byte) types.Tile {
 		firstByte := data[2*row]
 		secondByte := data[2*row+1]
 		for column := 0; column < 8; column++ {
-			tile[row][column] = calculateColor(column, firstByte, secondByte)
+			tile[row][column] = calculateColor(7-column, firstByte, secondByte)
 		}
 	}
 

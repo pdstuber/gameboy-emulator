@@ -44,14 +44,14 @@ func TestCalculateTile(t *testing.T) {
 
 func TestCalculateColor(t *testing.T) {
 
-	color1 := calculateColor(0, 0b10100101, 0b11000011)
-	color2 := calculateColor(1, 0b10100101, 0b11000011)
-	color3 := calculateColor(2, 0b10100101, 0b11000011)
-	color4 := calculateColor(3, 0b10100101, 0b11000011)
-	color5 := calculateColor(4, 0b10100101, 0b11000011)
-	color6 := calculateColor(5, 0b10100101, 0b11000011)
-	color7 := calculateColor(6, 0b10100101, 0b11000011)
-	color8 := calculateColor(7, 0b10100101, 0b11000011)
+	color1 := calculateColor(7, 0b10100101, 0b11000011)
+	color2 := calculateColor(6, 0b10100101, 0b11000011)
+	color3 := calculateColor(5, 0b10100101, 0b11000011)
+	color4 := calculateColor(4, 0b10100101, 0b11000011)
+	color5 := calculateColor(3, 0b10100101, 0b11000011)
+	color6 := calculateColor(2, 0b10100101, 0b11000011)
+	color7 := calculateColor(1, 0b10100101, 0b11000011)
+	color8 := calculateColor(0, 0b10100101, 0b11000011)
 
 	require.Equal(t, types.Black, color1)
 	require.Equal(t, types.DarkGrey, color2)
@@ -61,4 +61,24 @@ func TestCalculateColor(t *testing.T) {
 	require.Equal(t, types.LightGrey, color6)
 	require.Equal(t, types.DarkGrey, color7)
 	require.Equal(t, types.Black, color8)
+}
+func TestCalculateColor2(t *testing.T) {
+
+	color1 := calculateColor(7, 0b10011101, 0b11010010)
+	color2 := calculateColor(6, 0b10011101, 0b11010010)
+	color3 := calculateColor(5, 0b10011101, 0b11010010)
+	color4 := calculateColor(4, 0b10011101, 0b11010010)
+	color5 := calculateColor(3, 0b10011101, 0b11010010)
+	color6 := calculateColor(2, 0b10011101, 0b11010010)
+	color7 := calculateColor(1, 0b10011101, 0b11010010)
+	color8 := calculateColor(0, 0b10011101, 0b11010010)
+
+	require.Equal(t, types.Black, color1)
+	require.Equal(t, types.DarkGrey, color2)
+	require.Equal(t, types.White, color3)
+	require.Equal(t, types.Black, color4)
+	require.Equal(t, types.LightGrey, color5)
+	require.Equal(t, types.LightGrey, color6)
+	require.Equal(t, types.DarkGrey, color7)
+	require.Equal(t, types.LightGrey, color8)
 }

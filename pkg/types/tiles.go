@@ -5,10 +5,10 @@ import "image/color"
 type Color uint8
 
 const (
-	White Color = iota
-	LightGrey
-	DarkGrey
-	Black
+	White     Color = 0b00
+	LightGrey Color = 0b01
+	DarkGrey  Color = 0b10
+	Black     Color = 0b11
 )
 
 type Tile [8][8]Color

@@ -46,3 +46,24 @@ func X() types.Tile {
 
 	return tile
 }
+
+func CalculateTile(data [16]byte) types.Tile {
+	var tile types.Tile
+
+	for row := 0; row < 8; row++ {
+		firstByte := data[2*row]
+		secondByte := data[2*row+1]
+		for column := 0; column < 8; column++ {
+			tile[row][column] = calculateColor(column, firstByte, secondByte)
+		}
+	}
+
+	return tile
+}
+
+func calculateColor(column int, firstByte, secondByte byte) types.Color {
+	lsb := ((secondByte >> column) & 0x1) << 1
+	msb := (firstByte >> column) & 0x1
+
+	return types.Color(lsb | msb)
+}

@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/hajimehoshi/ebiten"
+	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/pdstuber/gameboy-emulator/internal/cpu"
 	"github.com/pdstuber/gameboy-emulator/internal/memory"
 	"github.com/pdstuber/gameboy-emulator/internal/ppu"

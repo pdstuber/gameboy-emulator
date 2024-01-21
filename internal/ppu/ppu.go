@@ -14,6 +14,10 @@ const (
 	numberOfTiles = 32
 )
 
+type LCDCReader interface {
+	GetRegisterLCDC() uint8
+}
+
 type PPU struct {
 	ticksChannel chan int
 	errorChannel chan error
@@ -22,6 +26,7 @@ type PPU struct {
 	tiles        []types.Tile
 	screenWidth  int
 	screenHeight int
+	lcdcReader   LCDCReader
 }
 
 func New(memory *memory.Memory) *PPU {
@@ -57,7 +62,10 @@ func (p *PPU) Start(ctx context.Context) error {
 }
 
 func (p *PPU) tick() error {
-
+	ppuInactive := p.lcdcReader.GetRegisterLCDC()&(1<<7) == 0
+	if ppuInactive {
+		return nil
+	}
 	for x := 0; x < numberOfTiles; x++ {
 		for y := 0; y < numberOfTiles; y++ {
 			tilePositionAddress := (y*32 + x) + 0x9800
@@ -86,21 +94,6 @@ func (p *PPU) NotifyTicks(ticks int) {
 	go func() {
 		p.ticksChannel <- ticks
 	}()
-}
-
-func calculateTile(index int, firstByte, secondByte byte) types.Tile {
-	var tile types.Tile
-
-	for i := 0; i < 8; i++ {
-		mask := uint8(1 << (7 - i))
-		lsb := firstByte & mask
-		msb := secondByte & mask
-
-		var color types.Color = types.Color(uint8(lsb) | uint8(msb)<<8)
-
-		tile[index][i] = color
-	}
-	return tile
 }
 
 func (p *PPU) writeToFramebuffer(tile types.Tile, tilePositionX, tilePositionY int) {

@@ -14,39 +14,6 @@ func PrettyPrintUINT16(value uint16) string {
 	return fmt.Sprintf("0x%04X", value)
 }
 
-func X() types.Tile {
-	var tile types.Tile
-
-	data := []byte{
-		0x3C, 0x7E, 0x42, 0x42, 0x42, 0x42, 0x42, 0x42, 0x7E, 0x5E, 0x7E, 0x0A, 0x7C, 0x56, 0x38, 0x7C,
-	}
-	// data for one tile occupies 16 bytes
-	for i := 0; i < 16; i += 2 {
-
-		byte1 := data[i]
-		byte2 := data[i+1]
-
-		for j := 7; j >= 0; j-- {
-			mask := uint8(1 << j)
-			//fmt.Printf("%08b\n", mask)
-			lsb := byte1 & mask
-			msb := byte2 & mask
-			//fmt.Printf("lsb: %08b\n", lsb>>j)
-			//fmt.Printf("msb: %08b\n", msb>>j)
-			//fmt.Printf("%2b\n", lsb|msb)
-			//fmt.Printf("0x%02X\n", msb)
-			//fmt.Printf("0x%02X\n", lsb)
-			x := msb>>j + lsb>>j
-			fmt.Printf("msb: %d\n", x)
-			var color types.Color = types.Color(uint16(lsb) | uint16(msb)<<8)
-
-			tile[i/2][j] = color
-		}
-	}
-
-	return tile
-}
-
 func CalculateTile(data []byte) types.Tile {
 	if len(data) != 16 {
 		panic("tile data must be exactly 16 bytes")

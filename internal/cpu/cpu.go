@@ -1,9 +1,7 @@
 package cpu
 
 import (
-	"context"
 	"fmt"
-	"log"
 
 	"github.com/pdstuber/gameboy-emulator/internal/memory"
 	"github.com/pdstuber/gameboy-emulator/internal/ppu"
@@ -60,42 +58,21 @@ func loadDefaults(cpu *CPU) {
 	cpu.pc = 0x100
 }
 
-func (cpu *CPU) Start(ctx context.Context) error {
-	log.Println("starting cpu")
-	go func() {
-		for {
-			cycles, err := cpu.FetchAndExecuteNextInstruction()
-			if err != nil {
-				cpu.errorChannel <- err
-				break
-			}
-			cpu.ppu.NotifyCycles(cycles)
-		}
-	}()
-
-	select {
-	case err := <-cpu.errorChannel:
-		return err
-	case <-ctx.Done():
-		return nil
-	}
-}
-
-func (c *CPU) FetchAndExecuteNextInstruction() (int, error) {
+func (c *CPU) Tick() error {
 	opcode := types.Opcode(c.ReadMemoryAndIncrementProgramCounter())
 
 	instruction, err := c.decodeInstruction(opcode)
 	if err != nil {
-		return 0, errors.Wrap(err, "could not decode instruction")
+		return errors.Wrap(err, "could not decode instruction")
 	}
 
-	cycles, err := instruction.Execute(c)
+	_, err = instruction.Execute(c)
 	if err != nil {
-		return 0, err
+		return err
 	}
 	c.lastWorkingProgramCounter = c.pc
 
-	return cycles, nil
+	return nil
 }
 
 func (c *CPU) ReadMemoryAndIncrementProgramCounter() byte {

@@ -1,7 +1,6 @@
 package ppu
 
 import (
-	"context"
 	"log"
 
 	"github.com/pdstuber/gameboy-emulator/internal/memory"
@@ -20,52 +19,29 @@ type LCDCReader interface {
 }
 
 type PPU struct {
-	ticksChannel chan int
-	errorChannel chan error
-	memory       *memory.Memory
-	pixels       []byte
-	tiles        []types.Tile
-	screenWidth  int
-	screenHeight int
-	lcdcReader   LCDCReader
+	memory     *memory.Memory
+	Pixels     []byte
+	lcdcReader LCDCReader
 }
 
-func New(memory *memory.Memory) *PPU {
+func New(memory *memory.Memory, screenSize int) *PPU {
 	return &PPU{
-		ticksChannel: make(chan int),
-		errorChannel: make(chan error),
-		memory:       memory,
-		pixels:       make([]byte, 256*256*4),
-		screenWidth:  256,
-		screenHeight: 256,
+		memory: memory,
+		Pixels: make([]byte, screenSize*4),
 	}
 }
 
-func (p *PPU) Start(ctx context.Context) error {
-	log.Println("starting ppu")
-
-	for {
-		select {
-		case <-p.ticksChannel:
-			err := p.tick()
-			p.errorChannel <- err
-		case err := <-p.errorChannel:
-			return err
-		case <-ctx.Done():
-			return nil
-		}
-	}
-
-}
-
-func (p *PPU) tick() error {
+func (p *PPU) Tick() error {
 	ppuInactive := p.lcdcReader.GetRegisterLCDC()&(1<<7) == 0
 	if ppuInactive {
+		log.Println("nothing to do")
 		return nil
 	}
-	for x := 0; x < numberOfTiles; x++ {
-		for y := 0; y < numberOfTiles; y++ {
-			tilePositionAddress := (y*32 + x) + 0x9800
+	log.Println("ticking")
+	for y := 0; y < numberOfTiles; y++ {
+		for x := 0; x < numberOfTiles; x++ {
+			currentPosition := y*32 + x
+			tilePositionAddress := currentPosition + 0x9800
 			tileIndex := p.memory.Read(types.Address(tilePositionAddress))
 
 			tileDataStartAddress := 0x8000 + uint16(tileIndex*16)
@@ -74,37 +50,28 @@ func (p *PPU) tick() error {
 			var tileData []byte = make([]byte, 16)
 
 			for i := 0; i < 16; i += 2 {
-
 				byte1 := p.memory.Read(types.Address(uint16(tileDataStartAddress) + uint16(i)))
 				byte2 := p.memory.Read(types.Address(uint16(tileDataStartAddress) + uint16(i+1)))
 
 				tileData = append(tileData, byte1, byte2)
 			}
 			tile := util.CalculateTile(tileData)
-			p.writeToFramebuffer(tile, x, y)
+			p.writeToFramebuffer(tile, currentPosition)
 		}
 	}
 
 	return nil
 }
 
-func (p *PPU) NotifyTicks(ticks int) {
-	go func() {
-		p.ticksChannel <- ticks
-	}()
-}
-
-func (p *PPU) writeToFramebuffer(tile types.Tile, tilePositionX, tilePositionY int) {
+func (p *PPU) writeToFramebuffer(tile types.Tile, currentPosition int) {
 	for i := 0; i < 8; i++ {
 		for j := 0; j < 8; j++ {
-			xr := tilePositionX*8 + j
-			yr := tilePositionY*8 + i
 			color := tile[i][j].ToStandardColor()
 
-			p.pixels[xr+yr] = color.R
-			p.pixels[xr+yr+1] = color.G
-			p.pixels[xr+yr+2] = color.B
-			p.pixels[xr+yr+3] = color.A
+			p.Pixels[currentPosition] = color.R
+			p.Pixels[currentPosition+1] = color.G
+			p.Pixels[currentPosition+2] = color.B
+			p.Pixels[currentPosition+3] = color.A
 		}
 	}
 }

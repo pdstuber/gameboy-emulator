@@ -4,13 +4,17 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"os"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/pdstuber/gameboy-emulator/internal/cpu"
 	"github.com/pdstuber/gameboy-emulator/internal/memory"
 	"github.com/pdstuber/gameboy-emulator/internal/ppu"
+)
+
+const (
+	screenWidth  = 256
+	screenHeight = 256
 )
 
 type gameboy struct {
@@ -56,7 +60,7 @@ func New(config *Config) (*gameboy, error) {
 		}
 	}
 
-	ppu := ppu.New(memory)
+	ppu := ppu.New(memory, screenWidth*screenHeight)
 
 	return &gameboy{
 		cpu:             cpu.New(bootRomLoaded, memory, ppu),
@@ -69,40 +73,16 @@ func New(config *Config) (*gameboy, error) {
 
 func (g *gameboy) Start(ctx context.Context) error {
 
-	// Add ebiten Update function and add channels to notify cpu and ppu about ticks they should perform.
-	go func() {
-		ebiten.SetWindowSize(p.screenWidth*6, p.screenHeight*6)
-		ebiten.SetWindowTitle("Gameboy Emulator")
-		if err := ebiten.RunGame(p); err != nil {
-			log.Fatal(err)
-		}
-
-	}()
-
-	go func() {
-		if err := g.cpu.Start(ctx); err != nil {
-			g.errorChannel <- err
-		}
-	}()
-
-	go func() {
-		if err := g.ppu.Start(ctx); err != nil {
-			g.errorChannel <- err
-		}
-	}()
-
-	select {
-	case err := <-g.errorChannel:
-		if g.debug {
-			log.Println(g.GetState())
-		}
+	ebiten.SetWindowSize(screenWidth*6, screenHeight*6)
+	ebiten.SetWindowTitle("Gameboy Emulator")
+	if err := ebiten.RunGame(g); err != nil {
 		return err
-	case <-ctx.Done():
-		return nil
 	}
+
+	return nil
 }
 
-func (e *gameboy) Stop() {
+func (g *gameboy) Stop() {
 }
 
 func (g *gameboy) GetState() string {
@@ -110,10 +90,20 @@ func (g *gameboy) GetState() string {
 }
 
 // http://www.codeslinger.co.uk/pages/projects/gameboy/graphics.html
-func (p *PPU) Draw(screen *ebiten.Image) {
-	screen.WritePixels(p.pixels)
+func (g *gameboy) Draw(screen *ebiten.Image) {
+	screen.WritePixels(g.ppu.Pixels)
 }
 
-func (p *PPU) Layout(outsideWidth, outsideHeight int) (int, int) {
-	return p.screenWidth, p.screenHeight
+func (g *gameboy) Update() error {
+	if err := g.cpu.Tick(); err != nil {
+		return err
+	}
+	if err := g.ppu.Tick(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (g *gameboy) Layout(outsideWidth, outsideHeight int) (int, int) {
+	return screenWidth, screenHeight
 }

@@ -3,7 +3,6 @@ package emulator
 import (
 	"fmt"
 	"io"
-	"log"
 	"os"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -77,7 +76,9 @@ func (g *gameboy) Start() error {
 	ebiten.SetWindowSize(screenWidth*2, screenHeight*2)
 	ebiten.SetWindowTitle("Gameboy Emulator")
 	if err := ebiten.RunGame(g); err != nil {
-		fmt.Println(err)
+		if g.debug {
+			fmt.Println(g.cpu.GetState())
+		}
 		return err
 	}
 
@@ -85,6 +86,7 @@ func (g *gameboy) Start() error {
 }
 
 func (g *gameboy) Stop() {
+	// TODO save state
 }
 
 func (g *gameboy) GetState() string {
@@ -98,7 +100,6 @@ func (g *gameboy) Draw(screen *ebiten.Image) {
 }
 
 func (g *gameboy) Update() error {
-	log.Println("inside update")
 	if err := g.cpu.Tick(); err != nil {
 		return err
 	}

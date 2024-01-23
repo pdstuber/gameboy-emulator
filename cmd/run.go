@@ -1,7 +1,11 @@
 package cmd
 
 import (
+	"context"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/pdstuber/gameboy-emulator/internal/emulator"
 	"github.com/spf13/cobra"
@@ -33,6 +37,13 @@ var runCmd = &cobra.Command{
 		if err != nil {
 			log.Panic(err)
 		}
+		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+		defer stop()
+
+		go func() {
+			<-ctx.Done()
+			emulator.Stop()
+		}()
 
 		if err := emulator.Start(); err != nil {
 			log.Fatalf("starting emulator: %v\n", err)

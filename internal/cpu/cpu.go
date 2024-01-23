@@ -113,6 +113,12 @@ func (c *CPU) decodeInstruction(opcode types.Opcode) (types.Instruction, error) 
 		instruction = instructions.NewLoadTo8BitRegister(opcode)
 	case 0xE0, 0xE2:
 		instruction = instructions.NewLoadAccumulator(opcode)
+	case 0x04, 0x0C, 0x14, 0x1C, 0x24, 0x2C, 0x34, 0x3C:
+		instruction = instructions.NewIncrementRegister(opcode)
+	case 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x77:
+		instruction = instructions.NewLoadFromRegister(opcode)
+	case 0x0A, 0x1A, 0x2A, 0x3A, 0x4A, 0x5A, 0x7A:
+		instruction = instructions.NewBitwiseAndRegister(opcode)
 	default:
 		return nil, fmt.Errorf("unsupported opcode: %s", util.PrettyPrintOpcode(opcode))
 	}

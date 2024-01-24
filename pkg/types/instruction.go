@@ -9,6 +9,8 @@ type CPU interface {
 	SetRegisterA(value uint8)
 	SetRegisterB(value uint8)
 	SetRegisterC(value uint8)
+	SetRegisterD(value uint8)
+	SetRegisterH(value uint8)
 	SetRegisterE(value uint8)
 	SetRegisterL(value uint8)
 	SetRegisterBC(value uint16)
@@ -26,6 +28,8 @@ type CPU interface {
 	GetRegisterL() uint8
 	GetRegisterSP() uint16
 	GetRegisterDE() uint16
+	GetRegisterBC() uint16
+	GetRegisterAF() uint16
 	UnsetFlagZero()
 
 	UnsetFlagHalfCarry()

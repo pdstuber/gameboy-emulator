@@ -113,7 +113,7 @@ func (c *CPU) decodeInstruction(opcode types.Opcode) (types.Instruction, error) 
 		instruction = instructions.NewLoadHLMinus(opcode)
 	case 0x18, 0x20, 0x30, 0x28, 0x38:
 		instruction = instructions.NewJumpConditionalRelative(opcode)
-	case 0x0E, 0x1E, 0x2E, 0x3E:
+	case 0x06, 0x16, 0x26, 0x0E, 0x1E, 0x2E, 0x3E:
 		instruction = instructions.NewLoadTo8BitRegister(opcode)
 	case 0xE0, 0xE2:
 		instruction = instructions.NewLoadFromAccumulator(opcode)
@@ -129,6 +129,8 @@ func (c *CPU) decodeInstruction(opcode types.Opcode) (types.Instruction, error) 
 		instruction = instructions.NewLoadRegister(opcode)
 	case 0x1A:
 		instruction = instructions.NewLoadAccumulator(opcode)
+	case 0xC5, 0xD5, 0xE5, 0xF5:
+		instruction = instructions.NewPush(opcode)
 	default:
 		return nil, fmt.Errorf("unsupported opcode: %s", util.PrettyPrintOpcode(opcode))
 	}
@@ -146,7 +148,7 @@ func (c *CPU) decodePrefixedInstruction(opcode types.Opcode) (types.Instruction,
 
 		instruction = instructions.NewTestBit(opcode)
 	default:
-		return nil, fmt.Errorf("unsupported opcode: %s", util.PrettyPrintOpcode(opcode))
+		return nil, fmt.Errorf("unsupported prefixed opcode: %s", util.PrettyPrintOpcode(opcode))
 	}
 
 	return instruction, nil
@@ -162,6 +164,14 @@ func (c *CPU) SetRegisterB(value uint8) {
 
 func (c *CPU) SetRegisterC(value uint8) {
 	c.c = value
+}
+
+func (c *CPU) SetRegisterD(value uint8) {
+	c.d = value
+}
+
+func (c *CPU) SetRegisterH(value uint8) {
+	c.h = value
 }
 
 func (c *CPU) SetRegisterE(value uint8) {
@@ -221,6 +231,14 @@ func (c *CPU) GetRegisterHL() uint16 {
 
 func (c *CPU) GetRegisterDE() uint16 {
 	return uint16(c.d)<<8 | uint16(c.e)
+}
+
+func (c *CPU) GetRegisterBC() uint16 {
+	return uint16(c.b)<<8 | uint16(c.c)
+}
+
+func (c *CPU) GetRegisterAF() uint16 {
+	return uint16(c.a)<<8 | uint16(c.f)
 }
 
 func (c *CPU) GetRegisterSP() uint16 {

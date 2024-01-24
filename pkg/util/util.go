@@ -37,3 +37,11 @@ func calculateColor(column int, firstByte, secondByte byte) types.Color {
 
 	return types.Color(lsb | msb)
 }
+
+func GetLeastSignificantBits(number uint16) uint8 {
+	return uint8(number & 0xFF)
+}
+
+func GetMostSignificantBits(number uint16) uint8 {
+	return uint8((number & 0xFF00) >> 8)
+}

@@ -26,19 +26,19 @@ func (i *BitwiseAndRegister) Execute(cpu types.CPU) (int, error) {
 	)
 
 	switch i.opcode {
-	case 0x0A:
+	case 0xA0:
 		registerValue = cpu.GetRegisterB()
-	case 0x1A:
+	case 0xA1:
 		registerValue = cpu.GetRegisterC()
-	case 0x2A:
+	case 0xA2:
 		registerValue = cpu.GetRegisterD()
-	case 0x3A:
+	case 0xA3:
 		registerValue = cpu.GetRegisterE()
-	case 0x4A:
+	case 0xA4:
 		registerValue = cpu.GetRegisterH()
-	case 0x5A:
+	case 0xA5:
 		registerValue = cpu.GetRegisterL()
-	case 0x7A:
+	case 0xA7:
 		registerValue = cpu.GetRegisterA()
 	default:
 		return 0, fmt.Errorf("unsupported opcode for increment register command: %s", util.PrettyPrintOpcode(i.opcode))

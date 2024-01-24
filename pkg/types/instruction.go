@@ -2,10 +2,12 @@ package types
 
 type CPU interface {
 	ReadMemoryAndIncrementProgramCounter() byte
+	ReadMemory(address Address) byte
 	WriteMemory(address Address, data byte)
 	SetProgramCounter(value uint16)
 	GetProgramCounter() uint16
 	SetRegisterA(value uint8)
+	SetRegisterB(value uint8)
 	SetRegisterC(value uint8)
 	SetRegisterE(value uint8)
 	SetRegisterL(value uint8)
@@ -22,7 +24,8 @@ type CPU interface {
 	GetRegisterH() uint8
 	GetRegisterHL() uint16
 	GetRegisterL() uint8
-
+	GetRegisterSP() uint16
+	GetRegisterDE() uint16
 	UnsetFlagZero()
 
 	UnsetFlagHalfCarry()

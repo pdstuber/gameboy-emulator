@@ -74,9 +74,13 @@ func (c *CPU) Tick() error {
 }
 
 func (c *CPU) ReadMemoryAndIncrementProgramCounter() byte {
-	data := c.memory.Read(types.Address(c.pc))
+	data := c.ReadMemory(types.Address(c.pc))
 	c.pc++
 	return data
+}
+
+func (c *CPU) ReadMemory(address types.Address) byte {
+	return c.memory.Read(address)
 }
 
 func (c *CPU) WriteMemory(address types.Address, data byte) {
@@ -112,13 +116,19 @@ func (c *CPU) decodeInstruction(opcode types.Opcode) (types.Instruction, error) 
 	case 0x0E, 0x1E, 0x2E, 0x3E:
 		instruction = instructions.NewLoadTo8BitRegister(opcode)
 	case 0xE0, 0xE2:
-		instruction = instructions.NewLoadAccumulator(opcode)
+		instruction = instructions.NewLoadFromAccumulator(opcode)
 	case 0x04, 0x0C, 0x14, 0x1C, 0x24, 0x2C, 0x34, 0x3C:
 		instruction = instructions.NewIncrementRegister(opcode)
 	case 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x77:
 		instruction = instructions.NewLoadFromRegister(opcode)
-	case 0x0A, 0x1A, 0x2A, 0x3A, 0x4A, 0x5A, 0x7A:
+	case 0xA0, 0xA1, 0xA2, 0xA3, 0xA4, 0xA5, 0xA7:
 		instruction = instructions.NewBitwiseAndRegister(opcode)
+	case 0xCD:
+		instruction = instructions.NewCall(opcode)
+	case 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x47, 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4F:
+		instruction = instructions.NewLoadRegister(opcode)
+	case 0x1A:
+		instruction = instructions.NewLoadAccumulator(opcode)
 	default:
 		return nil, fmt.Errorf("unsupported opcode: %s", util.PrettyPrintOpcode(opcode))
 	}
@@ -144,6 +154,10 @@ func (c *CPU) decodePrefixedInstruction(opcode types.Opcode) (types.Instruction,
 
 func (c *CPU) SetRegisterA(value uint8) {
 	c.a = value
+}
+
+func (c *CPU) SetRegisterB(value uint8) {
+	c.b = value
 }
 
 func (c *CPU) SetRegisterC(value uint8) {
@@ -203,6 +217,14 @@ func (c *CPU) GetRegisterH() uint8 {
 
 func (c *CPU) GetRegisterHL() uint16 {
 	return uint16(c.h)<<8 | uint16(c.l)
+}
+
+func (c *CPU) GetRegisterDE() uint16 {
+	return uint16(c.d)<<8 | uint16(c.e)
+}
+
+func (c *CPU) GetRegisterSP() uint16 {
+	return c.sp
 }
 
 func (c *CPU) GetRegisterL() uint8 {

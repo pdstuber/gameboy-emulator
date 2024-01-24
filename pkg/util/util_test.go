@@ -80,3 +80,19 @@ func TestCalculateColor2(t *testing.T) {
 	require.Equal(t, types.DarkGrey, color7)
 	require.Equal(t, types.LightGrey, color8)
 }
+
+func Test_getLeastSignificatBits(t *testing.T) {
+	number := uint16(0b1101100110111001)
+	lsb := GetLeastSignificantBits(number)
+
+	expected := uint8(0b10111001)
+	require.Equal(t, expected, lsb)
+}
+
+func Test_getMostSignificatBits(t *testing.T) {
+	number := uint16(0b1101100110111001)
+	msb := GetMostSignificantBits(number)
+
+	expected := uint8(0b11011001)
+	require.Equal(t, expected, msb)
+}

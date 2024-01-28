@@ -96,3 +96,48 @@ func Test_getMostSignificatBits(t *testing.T) {
 	expected := uint8(0b11011001)
 	require.Equal(t, expected, msb)
 }
+
+func Test_RotateLeftWithCarry(t *testing.T) {
+	number := uint8(0b11011001)
+	result, newCarry := RotateLeftWithCarry(number, true)
+
+	expectedResult := uint8(0b10110011)
+
+	expectedCarry := true
+
+	require.Equal(t, expectedResult, result)
+	require.Equal(t, expectedCarry, newCarry)
+
+	number = uint8(0b01011001)
+	result, newCarry = RotateLeftWithCarry(number, true)
+
+	expectedResult = uint8(0b10110011)
+
+	expectedCarry = false
+
+	require.Equal(t, expectedResult, result)
+	require.Equal(t, expectedCarry, newCarry)
+}
+
+func Test_SetCarryBit(t *testing.T) {
+	number := uint8(0b11011001)
+	carry := uint8(0b00000001)
+	result := setCarryBit(number, carry)
+
+	expectedResult := uint8(0b11011001)
+	require.Equal(t, expectedResult, result)
+
+	number = uint8(0b11011000)
+	carry = uint8(0b00000001)
+	result = setCarryBit(number, carry)
+
+	expectedResult = uint8(0b11011001)
+	require.Equal(t, expectedResult, result)
+
+	number = uint8(0b11011001)
+	carry = uint8(0b00000000)
+	result = setCarryBit(number, carry)
+
+	expectedResult = uint8(0b11011001)
+	require.Equal(t, expectedResult, result)
+}

@@ -8,3 +8,10 @@ func nextWord(cpu types.CPU) uint16 {
 
 	return uint16(lsb) | uint16(msb)<<8
 }
+
+func wordFromAddress(cpu types.CPU, address types.Address) uint16 {
+	lsb := cpu.ReadMemory(address)
+	msb := cpu.ReadMemory(address + 1)
+
+	return uint16(lsb) | uint16(msb)<<8
+}

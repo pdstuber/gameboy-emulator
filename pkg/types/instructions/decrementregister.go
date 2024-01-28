@@ -7,32 +7,32 @@ import (
 	"github.com/pdstuber/gameboy-emulator/pkg/util"
 )
 
-type IncrementRegister struct {
+type DecrementRegister struct {
 	durationInMachineCycles int
 	opcode                  types.Opcode
 }
 
-func NewIncrementRegister(opcode types.Opcode) *IncrementRegister {
-	return &IncrementRegister{
+func NewDecrementRegister(opcode types.Opcode) *DecrementRegister {
+	return &DecrementRegister{
 		durationInMachineCycles: 1,
 		opcode:                  opcode,
 	}
 }
 
-func (i *IncrementRegister) Execute(cpu types.CPU) (int, error) {
+func (i *DecrementRegister) Execute(cpu types.CPU) (int, error) {
 	var (
 		registerValue uint8
 		setRegister   func(cpu types.CPU, value uint8)
 	)
 
 	switch i.opcode {
-	case 0x0C:
-		registerValue = cpu.GetRegisterC()
-		setRegister = func(cpu types.CPU, value uint8) { cpu.SetRegisterC(value) }
+	case 0x05:
+		registerValue = cpu.GetRegisterB()
+		setRegister = func(cpu types.CPU, value uint8) { cpu.SetRegisterB(value) }
 	default:
 		return 0, fmt.Errorf("unsupported opcode for increment register command: %s", util.PrettyPrintOpcode(i.opcode))
 	}
-	result := registerValue + 0x1
+	result := uint8(registerValue - 0x1)
 	half_carry := (((registerValue & 0xF) + (0x1 & 0xF)) & 0x10) == 0x10
 
 	setRegister(cpu, result)
@@ -43,7 +43,7 @@ func (i *IncrementRegister) Execute(cpu types.CPU) (int, error) {
 		cpu.UnsetFlagZero()
 	}
 
-	cpu.UnsetFlagSubtraction()
+	cpu.SetFlagSubtraction()
 
 	if half_carry {
 		cpu.SetFlagHalfCarry()

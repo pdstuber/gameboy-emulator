@@ -20,29 +20,32 @@ func NewPush(opcode types.Opcode) *Push {
 }
 
 func (i *Push) Execute(cpu types.CPU) (int, error) {
-	var value uint16
+	var (
+		lsb uint8
+		msb uint8
+	)
 
 	switch i.opcode {
 	case 0xC5:
-		value = cpu.GetRegisterBC()
+		lsb = cpu.GetRegisterB()
+		msb = cpu.GetRegisterC()
 	case 0xD5:
-		value = cpu.GetRegisterDE()
+		lsb = cpu.GetRegisterD()
+		msb = cpu.GetRegisterE()
 	case 0xE5:
-		value = cpu.GetRegisterHL()
-	case 0xF5:
-		value = cpu.GetRegisterAF()
+		lsb = cpu.GetRegisterH()
+		msb = cpu.GetRegisterL()
 	default:
 		return 0, fmt.Errorf("unsupported opcode for push to stack command: %s", util.PrettyPrintOpcode(i.opcode))
 	}
 
 	sp := cpu.GetRegisterSP()
-	sp -= 1
-	msb := util.GetMostSignificantBits(value)
-	lsb := util.GetLeastSignificantBits(value)
 
 	cpu.WriteMemory(types.Address(sp), msb)
 	sp -= 1
 	cpu.WriteMemory(types.Address(sp), lsb)
+	sp -= 1
+	cpu.SetRegisterSP(sp)
 
 	return i.durationInMachineCycles, nil
 }

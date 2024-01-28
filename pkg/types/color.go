@@ -2,12 +2,6 @@ package types
 
 import "image/color"
 
-/*
-System.Drawing.ColorTranslator.FromHtml(Renga.Config.GetProperty("dmgColor1", "#9BBC0F")),
-System.Drawing.ColorTranslator.FromHtml(Renga.Config.GetProperty("dmgColor2", "#8BAC0F")),
-System.Drawing.ColorTranslator.FromHtml(Renga.Config.GetProperty("dmgColor3", "#306230")),
-System.Drawing.ColorTranslator.FromHtml(Renga.Config.GetProperty("dmgColor4", "#0F380F")),
-*/
 type Color uint8
 
 const (
@@ -18,7 +12,6 @@ const (
 )
 
 func (c Color) ToStandardColor() color.RGBA {
-	// TODO use corret rgb codes for the grey
 	switch c {
 	case White:
 		return color.RGBA{R: 255, G: 255, B: 255, A: 255}

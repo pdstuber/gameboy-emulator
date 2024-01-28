@@ -16,7 +16,7 @@ func PrettyPrintUINT16(value uint16) string {
 
 func CalculateTile(data []byte) types.Tile {
 	if len(data) != 16 {
-		panic("tile data must be exactly 16 bytes")
+		panic(fmt.Sprintf("tile data must be exactly 16 bytes, but was %d", len(data)))
 	}
 	var tile types.Tile
 
@@ -44,4 +44,21 @@ func GetLeastSignificantBits(number uint16) uint8 {
 
 func GetMostSignificantBits(number uint16) uint8 {
 	return uint8((number & 0xFF00) >> 8)
+}
+
+func RotateLeftWithCarry(number uint8, carry bool) (uint8, bool) {
+	newCarry := uint8(number & 0b10000000)
+
+	var c uint8
+	if carry {
+		c = 0b00000001
+	} else {
+		c = 0x00000000
+	}
+
+	return setCarryBit((number << 1), c), newCarry != uint8(0x0)
+}
+
+func setCarryBit(number uint8, carry uint8) uint8 {
+	return number | carry
 }

@@ -30,10 +30,6 @@ type CPU struct {
 	l    uint8
 	lcdc uint8
 
-	flagZ                     bool
-	flagN                     bool
-	flagH                     bool
-	flagC                     bool
 	lastWorkingProgramCounter uint16
 	memory                    *memory.Memory
 	errorChannel              chan error
@@ -131,6 +127,12 @@ func (c *CPU) decodeInstruction(opcode types.Opcode) (types.Instruction, error) 
 		instruction = instructions.NewLoadAccumulator(opcode)
 	case 0xC5, 0xD5, 0xE5, 0xF5:
 		instruction = instructions.NewPush(opcode)
+	case 0x17:
+		instruction = instructions.NewRotateLeft(opcode)
+	case 0xC1, 0xD1, 0xE1, 0xF1:
+		instruction = instructions.NewPop(opcode)
+	case 0x05, 0x15, 0x25, 0x0D, 0x1D, 0x2D, 0x3D:
+		instruction = instructions.NewDecrementRegister(opcode)
 	default:
 		return nil, fmt.Errorf("unsupported opcode: %s", util.PrettyPrintOpcode(opcode))
 	}
@@ -147,6 +149,8 @@ func (c *CPU) decodePrefixedInstruction(opcode types.Opcode) (types.Instruction,
 		0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77, 0x78, 0x79, 0x7A, 0x7B, 0x7C, 0x7D, 0x7E, 0x7F:
 
 		instruction = instructions.NewTestBit(opcode)
+	case 0x10, 0x11, 0x12, 0x13, 0x14, 0x15:
+		instruction = instructions.NewRotateLeft(opcode)
 	default:
 		return nil, fmt.Errorf("unsupported prefixed opcode: %s", util.PrettyPrintOpcode(opcode))
 	}
@@ -199,6 +203,11 @@ func (c *CPU) SetRegisterHL(value uint16) {
 
 func (c *CPU) SetRegisterSP(value uint16) {
 	c.sp = value
+}
+
+func (c *CPU) SetRegisterAF(value uint16) {
+	c.a = uint8((value & 0xFF00) >> 8)
+	c.f = uint8((value & 0xFF))
 }
 
 func (c *CPU) GetRegisterA() uint8 {

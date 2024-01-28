@@ -19,7 +19,7 @@ func NewJumpConditionalRelative(opcode types.Opcode) *JumpConditionalRelative {
 
 func (i *JumpConditionalRelative) Execute(cpu types.CPU) (int, error) {
 	var (
-		offset    = uint16(cpu.ReadMemoryAndIncrementProgramCounter())
+		offset    = int8(cpu.ReadMemoryAndIncrementProgramCounter())
 		cycles    = 2
 		condition bool
 	)
@@ -34,7 +34,7 @@ func (i *JumpConditionalRelative) Execute(cpu types.CPU) (int, error) {
 	}
 	if condition {
 		pc := cpu.GetProgramCounter()
-		cpu.SetProgramCounter(pc + offset)
+		cpu.SetProgramCounter(uint16(int(pc) + int(offset)))
 		cycles = 3
 	}
 	return cycles, nil

@@ -14,6 +14,10 @@ func PrettyPrintUINT16(value uint16) string {
 	return fmt.Sprintf("0x%04X", value)
 }
 
+func PrettyPrintBinary(value uint8) string {
+	return fmt.Sprintf("0b%08b", value)
+}
+
 func CalculateTile(data []byte) types.Tile {
 	if len(data) != 16 {
 		panic(fmt.Sprintf("tile data must be exactly 16 bytes, but was %d", len(data)))
@@ -61,4 +65,8 @@ func RotateLeftWithCarry(number uint8, carry bool) (uint8, bool) {
 
 func setCarryBit(number uint8, carry uint8) uint8 {
 	return number | carry
+}
+
+func TestBit(number uint8, bitToTest uint8) bool {
+	return number&uint8(1<<bitToTest) != 0x00
 }

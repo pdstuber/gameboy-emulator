@@ -15,6 +15,9 @@ const (
 	bitmaskFlagSubtraction = uint8(0x01 << 6)
 	bitmaskFlagHalfCarry   = uint8(0x01 << 5)
 	bitMaskFlagCarry       = uint8(0x01 << 4)
+
+	// ClockSpeed = 4194304
+	ClockSpeed = 600
 )
 
 type CPU struct {
@@ -52,20 +55,25 @@ func loadDefaults(cpu *CPU) {
 	cpu.pc = 0x100
 }
 
-func (c *CPU) Tick() error {
-	opcode := types.Opcode(c.ReadMemoryAndIncrementProgramCounter())
+func (c *CPU) Tick(cyclesToExecute int) error {
+	i := 0
+	for i <= cyclesToExecute {
+		opcode := types.Opcode(c.ReadMemoryAndIncrementProgramCounter())
 
-	instruction, err := c.decodeInstruction(opcode)
-	if err != nil {
-		return errors.Wrap(err, "could not decode instruction")
+		instruction, err := c.decodeInstruction(opcode)
+		if err != nil {
+			return errors.Wrap(err, "could not decode instruction")
+		}
+
+		cycles, err := instruction.Execute(c)
+		if err != nil {
+			return err
+		}
+		c.lastWorkingProgramCounter = c.pc
+
+		// fetching is also one cycle
+		i += cycles + 1
 	}
-
-	_, err = instruction.Execute(c)
-	if err != nil {
-		return err
-	}
-	c.lastWorkingProgramCounter = c.pc
-
 	return nil
 }
 
@@ -96,6 +104,7 @@ func (c *CPU) decodeInstruction(opcode types.Opcode) (types.Instruction, error) 
 	switch opcode {
 	case 0x00:
 		instruction = instructions.NewNOOP(opcode)
+		fmt.Println("noop")
 	case 0xCB:
 		nextOpcode := types.Opcode(c.ReadMemoryAndIncrementProgramCounter())
 		return c.decodePrefixedInstruction(nextOpcode)

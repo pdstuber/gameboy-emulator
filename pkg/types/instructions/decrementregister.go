@@ -37,7 +37,7 @@ func (i *DecrementRegister) Execute(cpu types.CPU) (int, error) {
 
 	setRegister(cpu, result)
 
-	if result == 0x0 {
+	if result == 0x00 {
 		cpu.SetFlagZero()
 	} else {
 		cpu.UnsetFlagZero()

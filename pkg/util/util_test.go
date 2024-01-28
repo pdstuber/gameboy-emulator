@@ -141,3 +141,20 @@ func Test_SetCarryBit(t *testing.T) {
 	expectedResult = uint8(0b11011001)
 	require.Equal(t, expectedResult, result)
 }
+
+func Test_TestBit(t *testing.T) {
+	number := uint8(0b10011111)
+	result := TestBit(number, 7)
+
+	require.Equal(t, true, result)
+
+	number = uint8(0b10101010)
+	result = TestBit(number, 7)
+
+	require.Equal(t, true, result)
+
+	number = uint8(0b01111111)
+	result = TestBit(number, 7)
+
+	require.Equal(t, false, result)
+}

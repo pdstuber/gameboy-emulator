@@ -15,8 +15,9 @@ type Memory struct {
 }
 
 func New() *Memory {
+	data := make([]byte, memorySize)
 	return &Memory{
-		data: make([]byte, memorySize),
+		data: data,
 	}
 }
 

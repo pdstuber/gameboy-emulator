@@ -27,18 +27,18 @@ func (i *TestBit) Execute(cpu types.CPU) (int, error) {
 	switch i.opcode {
 
 	case 0x7C:
-		testBit = 0x07
+		testBit = 7
 		valueToTest = cpu.GetRegisterH()
 	default:
 		return 0, fmt.Errorf("unsupported opcode for test bit command: %s", util.PrettyPrintOpcode(i.opcode))
 	}
 
-	result := valueToTest & uint8(0x01<<testBit)
+	result := util.TestBit(valueToTest, testBit)
 
-	if result != 0x0 {
-		cpu.SetFlagZero()
-	} else {
+	if result {
 		cpu.UnsetFlagZero()
+	} else {
+		cpu.SetFlagZero()
 	}
 
 	cpu.UnsetFlagSubtraction()

@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/pdstuber/gameboy-emulator/internal/cpu"
 	"github.com/pdstuber/gameboy-emulator/internal/memory"
 	"github.com/pdstuber/gameboy-emulator/internal/ppu"
@@ -23,6 +22,7 @@ type gameboy struct {
 	shutdownChannel chan interface{}
 	errorChannel    chan error
 	debug           bool
+	ticks           int
 }
 
 func New(config *Config) (*gameboy, error) {
@@ -69,6 +69,7 @@ func New(config *Config) (*gameboy, error) {
 		shutdownChannel: make(chan interface{}),
 		errorChannel:    make(chan error),
 		debug:           config.Debug,
+		ticks:           0,
 	}, nil
 }
 
@@ -95,17 +96,17 @@ func (g *gameboy) GetState() string {
 
 // http://www.codeslinger.co.uk/pages/projects/gameboy/graphics.html
 func (g *gameboy) Draw(screen *ebiten.Image) {
-	ebitenutil.DebugPrint(screen, fmt.Sprintf("fps=%0.2f\ntps=%0.2f", ebiten.CurrentFPS(), ebiten.CurrentTPS()))
 	screen.WritePixels(g.ppu.Pixels)
 }
 
 func (g *gameboy) Update() error {
-	if err := g.cpu.Tick(); err != nil {
+	if err := g.cpu.Tick(int(cpu.ClockSpeed / 60)); err != nil {
 		return err
 	}
 	if err := g.ppu.Tick(); err != nil {
 		return err
 	}
+
 	return nil
 }
 

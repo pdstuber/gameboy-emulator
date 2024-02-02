@@ -2,6 +2,7 @@ package cpu
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/pdstuber/gameboy-emulator/internal/memory"
 	"github.com/pdstuber/gameboy-emulator/pkg/types"
@@ -16,8 +17,7 @@ const (
 	bitmaskFlagHalfCarry   = uint8(0x01 << 5)
 	bitMaskFlagCarry       = uint8(0x01 << 4)
 
-	// ClockSpeed = 4194304
-	ClockSpeed = 600
+	ClockSpeed = 6000
 )
 
 type CPU struct {
@@ -89,6 +89,9 @@ func (c *CPU) ReadMemory(address types.Address) byte {
 
 func (c *CPU) WriteMemory(address types.Address, data byte) {
 	c.memory.Write(address, data)
+	if address >= 0x9800 || address >= 0x8000 {
+		log.Printf("Writing value 0x%2x\n", data)
+	}
 }
 
 func (c *CPU) SetProgramCounter(value uint16) {
@@ -104,7 +107,6 @@ func (c *CPU) decodeInstruction(opcode types.Opcode) (types.Instruction, error) 
 	switch opcode {
 	case 0x00:
 		instruction = instructions.NewNOOP(opcode)
-		fmt.Println("noop")
 	case 0xCB:
 		nextOpcode := types.Opcode(c.ReadMemoryAndIncrementProgramCounter())
 		return c.decodePrefixedInstruction(nextOpcode)
@@ -120,7 +122,7 @@ func (c *CPU) decodeInstruction(opcode types.Opcode) (types.Instruction, error) 
 		instruction = instructions.NewJumpConditionalRelative(opcode)
 	case 0x06, 0x16, 0x26, 0x0E, 0x1E, 0x2E, 0x3E:
 		instruction = instructions.NewLoadTo8BitRegister(opcode)
-	case 0xE0, 0xE2:
+	case 0xE0, 0xE2, 0x22, 0xEA:
 		instruction = instructions.NewLoadFromAccumulator(opcode)
 	case 0x04, 0x0C, 0x14, 0x1C, 0x24, 0x2C, 0x34, 0x3C:
 		instruction = instructions.NewIncrementRegister(opcode)
@@ -130,9 +132,12 @@ func (c *CPU) decodeInstruction(opcode types.Opcode) (types.Instruction, error) 
 		instruction = instructions.NewBitwiseAndRegister(opcode)
 	case 0xCD:
 		instruction = instructions.NewCall(opcode)
-	case 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x47, 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4F:
+	case 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x47, 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4F,
+		0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x57, 0x58, 0x59, 0x5A, 0x5B, 0x5C, 0x5D, 0x5F,
+		0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x67, 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6F,
+		0x78, 0x79, 0x7A, 0x7B, 0x7C, 0x7D, 0x7F:
 		instruction = instructions.NewLoadRegister(opcode)
-	case 0x1A:
+	case 0x1A, 0xF0:
 		instruction = instructions.NewLoadAccumulator(opcode)
 	case 0xC5, 0xD5, 0xE5, 0xF5:
 		instruction = instructions.NewPush(opcode)
@@ -142,6 +147,14 @@ func (c *CPU) decodeInstruction(opcode types.Opcode) (types.Instruction, error) 
 		instruction = instructions.NewPop(opcode)
 	case 0x05, 0x15, 0x25, 0x0D, 0x1D, 0x2D, 0x3D:
 		instruction = instructions.NewDecrementRegister(opcode)
+	case 0x13, 0x23:
+		instruction = instructions.NewIncrement16BitRegister(opcode)
+	case 0xC9:
+		instruction = instructions.NewReturn(opcode)
+	case 0xFE:
+		instruction = instructions.NewCompare(opcode)
+	case 0x90:
+		instruction = instructions.NewSubtract(opcode)
 	default:
 		return nil, fmt.Errorf("unsupported opcode: %s", util.PrettyPrintOpcode(opcode))
 	}
@@ -195,28 +208,8 @@ func (c *CPU) SetRegisterL(value uint8) {
 	c.l = value
 }
 
-func (c *CPU) SetRegisterBC(value uint16) {
-	c.b = uint8((value & 0xFF00) >> 8)
-	c.c = uint8((value & 0xFF))
-}
-
-func (c *CPU) SetRegisterDE(value uint16) {
-	c.d = uint8((value & 0xFF00) >> 8)
-	c.e = uint8((value & 0xFF))
-}
-
-func (c *CPU) SetRegisterHL(value uint16) {
-	c.h = uint8((value & 0xFF00) >> 8)
-	c.l = uint8((value & 0xFF))
-}
-
 func (c *CPU) SetRegisterSP(value uint16) {
 	c.sp = value
-}
-
-func (c *CPU) SetRegisterAF(value uint16) {
-	c.a = uint8((value & 0xFF00) >> 8)
-	c.f = uint8((value & 0xFF))
 }
 
 func (c *CPU) GetRegisterA() uint8 {

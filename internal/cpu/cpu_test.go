@@ -6,12 +6,23 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestSetRegisterBC(t *testing.T) {
+func TestGetRegisterHL(t *testing.T) {
 	cpu := New(true, nil)
-	value := uint16(0b1010101011111111)
+	cpu.SetRegisterH(0x8F)
+	cpu.SetRegisterL(0xFF)
 
-	cpu.SetRegisterBC(value)
+	require.Equal(t, uint8(0x8F), cpu.GetRegisterH())
+	require.Equal(t, uint8(0xFF), cpu.GetRegisterL())
+}
 
-	require.Equal(t, uint8(0b10101010), cpu.GetRegisterB())
-	require.Equal(t, uint8(0b11111111), cpu.GetRegisterC())
+func TestFlagZero(t *testing.T) {
+	cpu := New(true, nil)
+	cpu.UnsetFlagZero()
+
+	require.Equal(t, false, cpu.GetFlagZero())
+
+	cpu.SetFlagZero()
+
+	require.Equal(t, true, cpu.GetFlagZero())
+
 }

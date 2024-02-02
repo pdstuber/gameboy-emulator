@@ -18,9 +18,9 @@ func NewCall(opcode types.Opcode) *Call {
 }
 
 func (i *Call) Execute(cpu types.CPU) (int, error) {
-	nn := nextWord(cpu)
+	lsb := cpu.ReadMemoryAndIncrementProgramCounter()
+	msb := cpu.ReadMemoryAndIncrementProgramCounter()
 	sp := cpu.GetRegisterSP()
-	sp -= 1
 
 	pc := cpu.GetProgramCounter()
 	var pc_lsb uint8 = util.GetLeastSignificantBits(pc)
@@ -29,8 +29,9 @@ func (i *Call) Execute(cpu types.CPU) (int, error) {
 	cpu.WriteMemory(types.Address(sp), pc_msb)
 	sp -= 1
 	cpu.WriteMemory(types.Address(sp), pc_lsb)
+	sp -= 1
 	cpu.SetRegisterSP(sp)
-	cpu.SetProgramCounter(nn)
+	cpu.SetProgramCounter(util.UINT16FromUINT8(lsb, msb))
 
 	return i.durationInMachineCycles, nil
 }

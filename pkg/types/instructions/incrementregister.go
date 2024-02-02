@@ -29,6 +29,12 @@ func (i *IncrementRegister) Execute(cpu types.CPU) (int, error) {
 	case 0x0C:
 		registerValue = cpu.GetRegisterC()
 		setRegister = func(cpu types.CPU, value uint8) { cpu.SetRegisterC(value) }
+	case 0x04:
+		registerValue = cpu.GetRegisterB()
+		setRegister = func(cpu types.CPU, value uint8) { cpu.SetRegisterB(value) }
+	case 0x24:
+		registerValue = cpu.GetRegisterH()
+		setRegister = func(cpu types.CPU, value uint8) { cpu.SetRegisterH(value) }
 	default:
 		return 0, fmt.Errorf("unsupported opcode for increment register command: %s", util.PrettyPrintOpcode(i.opcode))
 	}

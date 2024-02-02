@@ -87,6 +87,11 @@ func Test_getLeastSignificatBits(t *testing.T) {
 
 	expected := uint8(0b10111001)
 	require.Equal(t, expected, lsb)
+	number = uint16(0x002B)
+	lsb = GetLeastSignificantBits(number)
+
+	expected = uint8(0x2B)
+	require.Equal(t, expected, lsb)
 }
 
 func Test_getMostSignificatBits(t *testing.T) {

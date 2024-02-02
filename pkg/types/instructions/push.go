@@ -40,12 +40,13 @@ func (i *Push) Execute(cpu types.CPU) (int, error) {
 	}
 
 	sp := cpu.GetRegisterSP()
-
-	cpu.WriteMemory(types.Address(sp), msb)
-	sp -= 1
-	cpu.WriteMemory(types.Address(sp), lsb)
-	sp -= 1
-	cpu.SetRegisterSP(sp)
+	if sp >= 2 {
+		cpu.WriteMemory(types.Address(sp), msb)
+		sp -= 1
+		cpu.WriteMemory(types.Address(sp), lsb)
+		sp -= 1
+		cpu.SetRegisterSP(sp)
+	}
 
 	return i.durationInMachineCycles, nil
 }

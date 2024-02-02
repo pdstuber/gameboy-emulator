@@ -10,7 +10,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceRoot}",
-            "args": ["run", "--debug", "roms/boot.gb"]
+            "args": ["run", "--debug", "roms/boot.gb","roms/tetris/tetris.gb"]
         }
     ]
 }

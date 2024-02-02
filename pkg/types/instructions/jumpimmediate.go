@@ -2,6 +2,7 @@ package instructions
 
 import (
 	"github.com/pdstuber/gameboy-emulator/pkg/types"
+	"github.com/pdstuber/gameboy-emulator/pkg/util"
 )
 
 type JumpImmediate struct {
@@ -17,9 +18,9 @@ func NewJumpImmediate(opcode types.Opcode) *JumpImmediate {
 }
 
 func (ji *JumpImmediate) Execute(cpu types.CPU) (int, error) {
-	nn := nextWord(cpu)
-
-	cpu.SetProgramCounter(nn)
+	lsb := cpu.ReadMemoryAndIncrementProgramCounter()
+	msb := cpu.ReadMemoryAndIncrementProgramCounter()
+	cpu.SetProgramCounter(util.UINT16FromUINT8(lsb, msb))
 
 	return ji.durationInMachineCycles, nil
 }

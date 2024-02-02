@@ -41,7 +41,7 @@ func (i *BitwiseAndRegister) Execute(cpu types.CPU) (int, error) {
 	case 0xA7:
 		registerValue = cpu.GetRegisterA()
 	default:
-		return 0, fmt.Errorf("unsupported opcode for increment register command: %s", util.PrettyPrintOpcode(i.opcode))
+		return 0, fmt.Errorf("unsupported opcode for bitwise and command: %s", util.PrettyPrintOpcode(i.opcode))
 	}
 
 	result := valueA & registerValue

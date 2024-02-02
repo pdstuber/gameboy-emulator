@@ -20,17 +20,21 @@ func NewLoadTo16BitRegister(opcode types.Opcode) *LoadTo16BitRegister {
 }
 
 func (i *LoadTo16BitRegister) Execute(cpu types.CPU) (int, error) {
-	nn := nextWord(cpu)
+	lsb := cpu.ReadMemoryAndIncrementProgramCounter()
+	msb := cpu.ReadMemoryAndIncrementProgramCounter()
 
 	switch i.opcode {
 	case 0x01:
-		cpu.SetRegisterBC(nn)
+		cpu.SetRegisterB(lsb)
+		cpu.SetRegisterC(msb)
 	case 0x11:
-		cpu.SetRegisterDE(nn)
+		cpu.SetRegisterD(lsb)
+		cpu.SetRegisterE(msb)
 	case 0x21:
-		cpu.SetRegisterHL(nn)
+		cpu.SetRegisterH(lsb)
+		cpu.SetRegisterL(msb)
 	case 0x31:
-		cpu.SetRegisterSP(nn)
+		cpu.SetRegisterSP(util.UINT16FromUINT8(lsb, msb))
 	default:
 		return 0, fmt.Errorf("unsupported opcode for 16 bit load command: %s", util.PrettyPrintOpcode(i.opcode))
 	}

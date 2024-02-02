@@ -68,6 +68,30 @@ func (i *LoadRegister) Execute(cpu types.CPU) (int, error) {
 	case 0x4F:
 		sourceValue = cpu.GetRegisterA()
 		setRegister = func(cpu types.CPU, value uint8) { cpu.SetRegisterC(value) }
+	case 0x78:
+		sourceValue = cpu.GetRegisterB()
+		setRegister = func(cpu types.CPU, value uint8) { cpu.SetRegisterA(value) }
+	case 0x79:
+		sourceValue = cpu.GetRegisterC()
+		setRegister = func(cpu types.CPU, value uint8) { cpu.SetRegisterA(value) }
+	case 0x7A:
+		sourceValue = cpu.GetRegisterD()
+		setRegister = func(cpu types.CPU, value uint8) { cpu.SetRegisterA(value) }
+	case 0x7B:
+		sourceValue = cpu.GetRegisterE()
+		setRegister = func(cpu types.CPU, value uint8) { cpu.SetRegisterA(value) }
+	case 0x7C:
+		sourceValue = cpu.GetRegisterH()
+		setRegister = func(cpu types.CPU, value uint8) { cpu.SetRegisterA(value) }
+	case 0x7D:
+		sourceValue = cpu.GetRegisterL()
+		setRegister = func(cpu types.CPU, value uint8) { cpu.SetRegisterA(value) }
+	case 0x57:
+		sourceValue = cpu.GetRegisterA()
+		setRegister = func(cpu types.CPU, value uint8) { cpu.SetRegisterD(value) }
+	case 0x67:
+		sourceValue = cpu.GetRegisterA()
+		setRegister = func(cpu types.CPU, value uint8) { cpu.SetRegisterH(value) }
 	default:
 		return 0, fmt.Errorf("unsupported opcode for load register command: %s", util.PrettyPrintOpcode(i.opcode))
 	}

@@ -2,6 +2,7 @@ package instructions
 
 import (
 	"github.com/pdstuber/gameboy-emulator/pkg/types"
+	"github.com/pdstuber/gameboy-emulator/pkg/util"
 )
 
 type LoadHLMinus struct {
@@ -18,7 +19,11 @@ func NewLoadHLMinus(opcode types.Opcode) *LoadHLMinus {
 
 func (i *LoadHLMinus) Execute(cpu types.CPU) (int, error) {
 	cpu.WriteMemory(types.Address(cpu.GetRegisterHL()), byte(cpu.GetRegisterA()))
-	cpu.SetRegisterHL(cpu.GetRegisterHL() - 1)
+
+	hl := cpu.GetRegisterHL() - 1
+
+	cpu.SetRegisterH(util.GetLeastSignificantBits(hl))
+	cpu.SetRegisterL(util.GetMostSignificantBits(hl))
 
 	return i.durationInMachineCycles, nil
 }

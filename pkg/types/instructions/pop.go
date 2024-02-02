@@ -20,17 +20,24 @@ func NewPop(opcode types.Opcode) *Pop {
 }
 
 func (i *Pop) Execute(cpu types.CPU) (int, error) {
-	var setRegister func(cpu types.CPU, value uint16)
+	var setRegister func(cpu types.CPU, value1, value2 uint8)
 
 	switch i.opcode {
 	case 0xC1:
-		setRegister = func(cpu types.CPU, value uint16) { cpu.SetRegisterBC(value) }
+		setRegister = func(cpu types.CPU, value1, value2 uint8) {
+			cpu.SetRegisterB(value1)
+			cpu.SetRegisterC(value2)
+		}
 	case 0xD1:
-		setRegister = func(cpu types.CPU, value uint16) { cpu.SetRegisterDE(value) }
+		setRegister = func(cpu types.CPU, value1, value2 uint8) {
+			cpu.SetRegisterD(value1)
+			cpu.SetRegisterE(value2)
+		}
 	case 0xE1:
-		setRegister = func(cpu types.CPU, value uint16) { cpu.SetRegisterHL(value) }
-	case 0xF1:
-		setRegister = func(cpu types.CPU, value uint16) { cpu.SetRegisterAF(value) }
+		setRegister = func(cpu types.CPU, value1, value2 uint8) {
+			cpu.SetRegisterH(value1)
+			cpu.SetRegisterL(value2)
+		}
 	default:
 		return 0, fmt.Errorf("unsupported opcode for push to stack command: %s", util.PrettyPrintOpcode(i.opcode))
 	}
@@ -38,10 +45,11 @@ func (i *Pop) Execute(cpu types.CPU) (int, error) {
 	sp := cpu.GetRegisterSP()
 	sp += 1
 
-	value := wordFromAddress(cpu, types.Address(sp))
-
+	msb := cpu.ReadMemory(types.Address(sp))
 	sp += 1
-	setRegister(cpu, value)
+	lsb := cpu.ReadMemory(types.Address(sp))
+
+	setRegister(cpu, msb, lsb)
 
 	cpu.SetRegisterSP(sp)
 

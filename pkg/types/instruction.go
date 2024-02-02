@@ -13,11 +13,7 @@ type CPU interface {
 	SetRegisterH(value uint8)
 	SetRegisterE(value uint8)
 	SetRegisterL(value uint8)
-	SetRegisterBC(value uint16)
-	SetRegisterDE(value uint16)
-	SetRegisterHL(value uint16)
 	SetRegisterSP(value uint16)
-	SetRegisterAF(value uint16)
 
 	GetRegisterA() uint8
 	GetRegisterB() uint8

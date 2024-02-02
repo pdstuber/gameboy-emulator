@@ -27,8 +27,15 @@ func (i *JumpConditionalRelative) Execute(cpu types.CPU) (int, error) {
 	switch i.opcode {
 	case 0x20:
 		condition = !cpu.GetFlagZero()
+	case 0x30:
+		condition = !cpu.GetFlagCarry()
 	case 0x18:
 		condition = true
+	case 0x28:
+		condition = cpu.GetFlagZero()
+	case 0x38:
+		condition = cpu.GetFlagCarry()
+
 	default:
 		return 0, fmt.Errorf("unsupported opcode for jump conditional command: %s", util.PrettyPrintOpcode(i.opcode))
 	}

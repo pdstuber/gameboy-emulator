@@ -55,13 +55,13 @@ func New(config *Config) (*gameboy, error) {
 			return nil, fmt.Errorf("could not read rom data: %w", err)
 		}
 
-		if err := memory.Load(romData, 0x100); err != nil {
+		if err := memory.Load(romData[0x100:], 0x100); err != nil {
 			return nil, err
 		}
 	}
 
 	cpu := cpu.New(bootRomLoaded, memory)
-	ppu := ppu.New(memory, cpu, screenWidth*screenHeight)
+	ppu := ppu.New(memory, screenWidth*screenHeight)
 
 	return &gameboy{
 		cpu:             cpu,

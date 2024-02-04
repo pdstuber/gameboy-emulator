@@ -1,6 +1,7 @@
 package types
 
 type CPU interface {
+	DecodeAndExecuteNextInstruction() (int, error)
 	ReadMemoryAndIncrementProgramCounter() byte
 	ReadMemory(address Address) byte
 	WriteMemory(address Address, data byte)

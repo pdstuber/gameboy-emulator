@@ -24,5 +24,4 @@ func TestFlagZero(t *testing.T) {
 	cpu.SetFlagZero()
 
 	require.Equal(t, true, cpu.GetFlagZero())
-
 }

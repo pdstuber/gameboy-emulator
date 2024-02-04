@@ -1,6 +1,11 @@
 package ppu
 
 import (
+	"fmt"
+	"image"
+	"image/png"
+	"os"
+
 	"github.com/pdstuber/gameboy-emulator/internal/memory"
 	"github.com/pdstuber/gameboy-emulator/pkg/types"
 	"github.com/pdstuber/gameboy-emulator/pkg/util"
@@ -9,31 +14,29 @@ import (
 const (
 	vramBegin     = 0x8000
 	vramEnd       = 0x9FFF
+	ldcd          = 0xFF40
+	scx           = 0xFF43
+	scy           = 0xFF42
 	numberOfTiles = 32
 )
 
-type LCDCReader interface {
-	GetRegisterLCDC() uint8
-}
-
 type PPU struct {
-	memory     *memory.Memory
-	Pixels     []byte
-	lcdcReader LCDCReader
+	memory  *memory.Memory
+	Pixels  []byte
+	counter int
 }
 
-func New(memory *memory.Memory, lcdcReader LCDCReader, screenSize int) *PPU {
+func New(memory *memory.Memory, screenSize int) *PPU {
 	return &PPU{
-		memory:     memory,
-		lcdcReader: lcdcReader,
-		Pixels:     make([]byte, screenSize*4),
+		memory:  memory,
+		Pixels:  make([]byte, screenSize*4),
+		counter: 0,
 	}
 }
 
 func (p *PPU) Tick() error {
 	/*
-		ppuInactive := p.lcdcReader.GetRegisterLCDC()&(1<<7) == 0
-		if ppuInactive {
+		if ppuInactive := p.memory.Read(types.Address(0xFF40))&(1<<7) == 0; ppuInactive {
 			return nil
 		}
 	*/
@@ -58,7 +61,14 @@ func (p *PPU) Tick() error {
 			p.writeToFramebuffer(tile, currentPosition)
 		}
 	}
-
+	upLeft := image.Point{0, 0}
+	lowRight := image.Point{256, 256}
+	img := image.NewRGBA(image.Rectangle{upLeft, lowRight})
+	img.Pix = p.Pixels
+	// Encode as PNG.
+	f, _ := os.Create(fmt.Sprintf("images/image%d.png", p.counter))
+	png.Encode(f, img)
+	p.counter = p.counter + 1
 	return nil
 }
 

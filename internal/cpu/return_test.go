@@ -4,13 +4,12 @@ import (
 	"testing"
 
 	"github.com/pdstuber/gameboy-emulator/internal/memory"
+	"github.com/pdstuber/gameboy-emulator/pkg/instructions"
 	"github.com/pdstuber/gameboy-emulator/pkg/types"
-	"github.com/pdstuber/gameboy-emulator/pkg/types/instructions"
 	"github.com/stretchr/testify/require"
 )
 
 func Test_Return_Execute(t *testing.T) {
-
 	memory := memory.New()
 	cpu := New(true, memory)
 

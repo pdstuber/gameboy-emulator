@@ -68,8 +68,9 @@ func setCarryBit(number uint8, carry uint8) uint8 {
 }
 
 func TestBit(number uint8, bitToTest uint8) bool {
-	return number&uint8(1<<bitToTest) != 0x00
+	return (number & uint8(1<<bitToTest)) == uint8(0)
 }
+
 func UINT16FromUINT8(lsb, msb uint8) uint16 {
 	return uint16(lsb) | uint16(msb)<<8
 }

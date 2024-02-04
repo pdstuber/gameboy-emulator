@@ -3,13 +3,12 @@ package cpu
 import (
 	"testing"
 
+	"github.com/pdstuber/gameboy-emulator/pkg/instructions"
 	"github.com/pdstuber/gameboy-emulator/pkg/types"
-	"github.com/pdstuber/gameboy-emulator/pkg/types/instructions"
 	"github.com/stretchr/testify/require"
 )
 
 func Test_TestBit_Execute(t *testing.T) {
-
 	cpu := New(true, nil)
 
 	i := instructions.NewTestBit(types.Opcode(0x7C))

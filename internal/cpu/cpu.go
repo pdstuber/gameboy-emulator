@@ -5,8 +5,8 @@ import (
 	"log"
 
 	"github.com/pdstuber/gameboy-emulator/internal/memory"
+	"github.com/pdstuber/gameboy-emulator/pkg/instructions"
 	"github.com/pdstuber/gameboy-emulator/pkg/types"
-	"github.com/pdstuber/gameboy-emulator/pkg/types/instructions"
 	"github.com/pdstuber/gameboy-emulator/pkg/util"
 	"github.com/pkg/errors"
 )
@@ -17,7 +17,7 @@ const (
 	bitmaskFlagHalfCarry   = uint8(0x01 << 5)
 	bitMaskFlagCarry       = uint8(0x01 << 4)
 
-	ClockSpeed = 6000
+	ClockSpeed = 4194304
 )
 
 type CPU struct {
@@ -58,14 +58,7 @@ func loadDefaults(cpu *CPU) {
 func (c *CPU) Tick(cyclesToExecute int) error {
 	i := 0
 	for i <= cyclesToExecute {
-		opcode := types.Opcode(c.ReadMemoryAndIncrementProgramCounter())
-
-		instruction, err := c.decodeInstruction(opcode)
-		if err != nil {
-			return errors.Wrap(err, "could not decode instruction")
-		}
-
-		cycles, err := instruction.Execute(c)
+		cycles, err := c.DecodeAndExecuteNextInstruction()
 		if err != nil {
 			return err
 		}
@@ -75,6 +68,21 @@ func (c *CPU) Tick(cyclesToExecute int) error {
 		i += cycles + 1
 	}
 	return nil
+}
+
+func (c *CPU) DecodeAndExecuteNextInstruction() (int, error) {
+	opcode := types.Opcode(c.ReadMemoryAndIncrementProgramCounter())
+
+	instruction, err := c.decodeInstruction(opcode)
+	if err != nil {
+		return 0, errors.Wrap(err, "could not decode instruction")
+	}
+
+	cycles, err := instruction.Execute(c)
+	if err != nil {
+		return 0, errors.Wrap(err, "could not execute instruction")
+	}
+	return cycles, nil
 }
 
 func (c *CPU) ReadMemoryAndIncrementProgramCounter() byte {
@@ -89,8 +97,8 @@ func (c *CPU) ReadMemory(address types.Address) byte {
 
 func (c *CPU) WriteMemory(address types.Address, data byte) {
 	c.memory.Write(address, data)
-	if address >= 0x9800 || address >= 0x8000 {
-		log.Printf("Writing value 0x%2x\n", data)
+	if address == types.Address(0x0091) {
+		log.Println("should not happen")
 	}
 }
 
@@ -155,6 +163,10 @@ func (c *CPU) decodeInstruction(opcode types.Opcode) (types.Instruction, error) 
 		instruction = instructions.NewCompare(opcode)
 	case 0x90:
 		instruction = instructions.NewSubtract(opcode)
+	case 0xBE:
+		instruction = instructions.NewCompareIndirect(opcode)
+	case 0x86:
+		instruction = instructions.NewAddIndirect(opcode)
 	default:
 		return nil, fmt.Errorf("unsupported opcode: %s", util.PrettyPrintOpcode(opcode))
 	}

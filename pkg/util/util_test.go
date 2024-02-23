@@ -133,10 +133,30 @@ func Test_RotateLeftWithCarry(t *testing.T) {
 	require.Equal(t, expectedResult, result)
 	require.Equal(t, expectedCarry, newCarry)
 
-	number = uint8(0x80)
+	number = uint8(0xCE)
 	result, newCarry = RotateLeftWithCarry(number, false)
 
-	expectedResult = uint8(0xFF)
+	expectedResult = uint8(0x9C)
+
+	expectedCarry = true
+
+	require.Equal(t, expectedResult, result)
+	require.Equal(t, expectedCarry, newCarry)
+
+	number = uint8(0xCE)
+	result, newCarry = RotateLeftWithCarry(number, true)
+
+	expectedResult = uint8(0x9D)
+
+	expectedCarry = true
+
+	require.Equal(t, expectedResult, result)
+	require.Equal(t, expectedCarry, newCarry)
+
+	number = uint8(0x39)
+	result, newCarry = RotateLeftWithCarry(number, true)
+
+	expectedResult = uint8(0x73)
 
 	expectedCarry = false
 

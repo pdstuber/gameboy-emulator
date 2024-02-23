@@ -57,7 +57,7 @@ func (i *RotateLeft) Execute(cpu types.CPU) (int, error) {
 	result, newCarry := util.RotateLeftWithCarry(sourceRegisterValue, carry)
 
 	if newCarry {
-		cpu.GetFlagCarry()
+		cpu.SetFlagCarry()
 	} else {
 		cpu.UnsetFlagCarry()
 	}

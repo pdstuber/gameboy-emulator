@@ -57,7 +57,6 @@ func RotateLeftWithCarry(number uint8, carry bool) (uint8, bool) {
 	} else {
 		c = 0x00000000
 	}
-
 	return setCarryBit((number << 1), c), !TestBit(number, 7)
 }
 

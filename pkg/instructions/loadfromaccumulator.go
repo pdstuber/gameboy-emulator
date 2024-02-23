@@ -36,11 +36,11 @@ func (i *LoadFromAccumulator) Execute(cpu types.CPU) (int, error) {
 		lsb_value = cpu.GetRegisterC()
 		cycles = 2
 	case 0x22:
-		lsb_value = cpu.GetRegisterH()
-		msb_value = cpu.GetRegisterL()
+		msb_value = cpu.GetRegisterH()
+		lsb_value = cpu.GetRegisterL()
 		newValue := util.UINT16FromUINT8(lsb_value, msb_value) + 1
-		cpu.SetRegisterH(util.GetLeastSignificantBits(newValue))
-		cpu.SetRegisterL(util.GetMostSignificantBits(newValue))
+		cpu.SetRegisterH(util.GetMostSignificantBits(newValue))
+		cpu.SetRegisterL(util.GetLeastSignificantBits(newValue))
 		cycles = 2
 
 	default:

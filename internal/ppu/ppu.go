@@ -35,29 +35,14 @@ func New(memory *memory.Memory, screenSize int) *PPU {
 }
 
 func (p *PPU) Tick() error {
-	/*
-		if ppuInactive := p.memory.Read(types.Address(0xFF40))&(1<<7) == 0; ppuInactive {
-			return nil
-		}
-	*/
+	if ppuInactive := p.memory.Read(types.Address(0xFF40))&(1<<7) == 0; ppuInactive {
+		return nil
+	}
+
 	for y := 0; y < numberOfTiles; y++ {
 		for x := 0; x < numberOfTiles; x++ {
+			tile := p.calculateTile(x, y)
 			currentPosition := y*32 + x
-			tilePositionAddress := currentPosition + 0x9800
-			tileIndex := p.memory.Read(types.Address(tilePositionAddress))
-
-			tileDataStartAddress := 0x8000 + uint16(tileIndex*16)
-
-			// data for one tile occupies 16 bytes
-			var tileData []byte
-
-			for i := 0; i < 16; i += 2 {
-				byte1 := p.memory.Read(types.Address(uint16(tileDataStartAddress) + uint16(i)))
-				byte2 := p.memory.Read(types.Address(uint16(tileDataStartAddress) + uint16(i+1)))
-
-				tileData = append(tileData, byte1, byte2)
-			}
-			tile := util.CalculateTile(tileData)
 			p.writeToFramebuffer(tile, currentPosition)
 		}
 	}
@@ -70,6 +55,26 @@ func (p *PPU) Tick() error {
 	png.Encode(f, img)
 	p.counter = p.counter + 1
 	return nil
+}
+
+func (p *PPU) calculateTile(x, y int) types.Tile {
+	currentPosition := y*32 + x
+	tilePositionAddress := currentPosition + 0x9800
+	tileIndex := p.memory.Read(types.Address(tilePositionAddress))
+
+	tileDataStartAddress := 0x8000 + uint16(tileIndex*16)
+
+	// data for one tile occupies 16 bytes
+	var tileData []byte
+
+	for i := 0; i < 16; i += 2 {
+		byte1 := p.memory.Read(types.Address(uint16(tileDataStartAddress) + uint16(i)))
+		byte2 := p.memory.Read(types.Address(uint16(tileDataStartAddress) + uint16(i+1)))
+
+		tileData = append(tileData, byte1, byte2)
+	}
+
+	return util.CalculateTile(tileData)
 }
 
 func (p *PPU) writeToFramebuffer(tile types.Tile, currentPosition int) {

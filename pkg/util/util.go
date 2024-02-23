@@ -51,8 +51,6 @@ func GetMostSignificantBits(number uint16) uint8 {
 }
 
 func RotateLeftWithCarry(number uint8, carry bool) (uint8, bool) {
-	newCarry := uint8(number & 0b10000000)
-
 	var c uint8
 	if carry {
 		c = 0b00000001
@@ -60,7 +58,7 @@ func RotateLeftWithCarry(number uint8, carry bool) (uint8, bool) {
 		c = 0x00000000
 	}
 
-	return setCarryBit((number << 1), c), newCarry != uint8(0x0)
+	return setCarryBit((number << 1), c), !TestBit(number, 7)
 }
 
 func setCarryBit(number uint8, carry uint8) uint8 {

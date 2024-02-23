@@ -19,6 +19,7 @@ func Test_TestBit_Execute(t *testing.T) {
 	i.Execute(cpu)
 
 	require.Equal(t, false, cpu.GetFlagZero())
+	require.Equal(t, true, cpu.GetFlagCarry())
 
 	cpu.SetRegisterH(0x7F)
 	cpu.SetRegisterL(0xFF)
@@ -26,4 +27,5 @@ func Test_TestBit_Execute(t *testing.T) {
 	i.Execute(cpu)
 
 	require.Equal(t, true, cpu.GetFlagZero())
+	require.Equal(t, false, cpu.GetFlagCarry())
 }

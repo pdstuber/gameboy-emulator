@@ -122,6 +122,26 @@ func Test_RotateLeftWithCarry(t *testing.T) {
 
 	require.Equal(t, expectedResult, result)
 	require.Equal(t, expectedCarry, newCarry)
+
+	number = uint8(0x7F)
+	result, newCarry = RotateLeftWithCarry(number, true)
+
+	expectedResult = uint8(0xFF)
+
+	expectedCarry = false
+
+	require.Equal(t, expectedResult, result)
+	require.Equal(t, expectedCarry, newCarry)
+
+	number = uint8(0x80)
+	result, newCarry = RotateLeftWithCarry(number, false)
+
+	expectedResult = uint8(0xFF)
+
+	expectedCarry = false
+
+	require.Equal(t, expectedResult, result)
+	require.Equal(t, expectedCarry, newCarry)
 }
 
 func Test_SetCarryBit(t *testing.T) {
@@ -151,15 +171,31 @@ func Test_TestBit(t *testing.T) {
 	number := uint8(0b10011111)
 	result := TestBit(number, 7)
 
-	require.Equal(t, true, result)
+	require.Equal(t, false, result)
 
 	number = uint8(0b10101010)
 	result = TestBit(number, 7)
 
-	require.Equal(t, true, result)
+	require.Equal(t, false, result)
 
 	number = uint8(0b01111111)
 	result = TestBit(number, 7)
 
+	require.Equal(t, true, result)
+
+	number = uint8(0x7F)
+	result = TestBit(number, 7)
 	require.Equal(t, false, result)
+
+	number = uint8(0x00)
+	result = TestBit(number, 7)
+	require.Equal(t, false, result)
+
+	number = uint8(0x0F)
+	result = TestBit(number, 7)
+	require.Equal(t, false, result)
+
+	number = uint8(0xF0)
+	result = TestBit(number, 7)
+	require.Equal(t, true, result)
 }

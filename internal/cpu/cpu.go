@@ -17,7 +17,8 @@ const (
 	bitmaskFlagHalfCarry   = uint8(0x01 << 5)
 	bitMaskFlagCarry       = uint8(0x01 << 4)
 
-	ClockSpeed = 4194304
+	// ClockSpeed = 4194304
+	ClockSpeed = 6000
 )
 
 type CPU struct {
